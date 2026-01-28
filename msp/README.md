@@ -1,4 +1,4 @@
-# MSP Master Specification (v0.1.0)
+# MSP Master Specification (v0.1.1)
 
 > **Module:** Memory & Soul Passport (MSP)
 > **Status:** Current Standard
