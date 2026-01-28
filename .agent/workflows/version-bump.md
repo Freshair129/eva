@@ -79,6 +79,12 @@ Add entry at TOP of file:
 ### Step 5: Update Main `CHANGELOG.md`
 Add summary entry under the appropriate section with link to module's VERSION_HISTORY.
 
+### Step 5.1: Evaluate Architectural Decision Records (ADR)
+If the change introduces a new architecture, structural pattern, or significant logic shift:
+1. Review `docs/03_ADR/`
+2. Create a new `ADR-XXX.md` using the template if needed
+3. Update existing ADRs if they are superseded
+
 ### Step 6: Commit Message Format
 ```
 [{Module}] v{X.Y.Z}: Brief description

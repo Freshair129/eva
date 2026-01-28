@@ -12,7 +12,8 @@
 1. **Bump the version** in `__init__.py`
 2. **Update `VERSION_HISTORY.md`** in that module
 3. **Update main `CHANGELOG.md`** with summary
-4. **Sync changes to Git** (Commit & Push)
+4. **Evaluate ADRs**: Check if this change requires a new ADR or updates to existing ones (for architecture shifts)
+5. **Sync changes to Git** (Commit & Push)
 
 ---
 
