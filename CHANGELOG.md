@@ -34,16 +34,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - **MSP Layer (Phase 1) [Implemented by Antigravity]**
     - Established MSP directory structure (`msp/`, `msp/schema/`, `msp/storage/`, `msp/tests/`) (P1-001)
-    - **MSP Schema Evolution (v0.0.1 → v0.0.8) [Implemented by Antigravity]**
-        - `EpisodicMemory` (P1-002): Initial schema with content, summary, tags
-        - `SemanticMemory` (P1-003): SPO structure for knowledge graphs
-        - V2 Alignment: Nested `TurnUser`, `TurnLLM`, `SituationContext`
-        - Enhanced Context: `location_context`, `domain_area`, `mission_goal`, `agent_role`
-        - `StructuredSummary`: action_taken, key_outcome, future_implication
-        - **File-per-Record Architecture** (v0.0.8):
-            - Created `turn.py` with standalone Turn classes
-            - Episodes now use `turn_refs` (references only)
-            - Added `get_file_path()` for consistent storage paths
+    - **MSP Schema Evolution (v0.0.1 → v0.0.9) [Implemented by Antigravity]**
+        - `EpisodicMemory` (P1-002), `SemanticMemory` (P1-003)
+        - V2 Alignment: Nested Turns, Enhanced Context, Structured Summary
+        - **File-per-Record Architecture** (v0.0.8): Standalone `turn.py` & referenced episodes
+        - **MSP Master Specification** (v0.0.9): Added [msp/README.md](msp/README.md) guide
         - See: [msp/VERSION_HISTORY.md](msp/VERSION_HISTORY.md) for full changelog
 
 

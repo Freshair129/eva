@@ -12,8 +12,8 @@ Version History:
 - 0.0.5: Enhanced context (location_context, domain_area, mission_goal, agent_role)
 - 0.0.6: StructuredSummary (action_taken, key_outcome, future_implication)
 - 0.0.7: Renamed raw_text to text_excerpt
-- 0.0.8: File-per-Record architecture (turn.py, turn_refs, get_file_path)
+- 0.0.9: Added MSP Master Specification (msp/README.md)
 """
 
-__version__ = "0.0.8"
+__version__ = "0.0.9"
 __schema_version__ = "episodic_v3"

@@ -6,6 +6,13 @@
 
 ---
 
+## [0.0.9] - 2026-01-29
+
+### Added
+- **MSP Master Specification** (`msp/README.md`): Detailed guide for all fields, meanings, and examples to prevent agent hallucination.
+
+---
+
 ## [0.0.8] - 2026-01-28
 
 ### Changed
