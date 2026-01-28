@@ -17,8 +17,9 @@ Version History:
 - 0.2.0: FileMemoryStore implementation (P1-005)
 - 0.2.1: WorkflowState for task tracking within episodes
 - 0.3.0: ChromaDB integration for semantic search (P1-006)
+- 0.4.0: MSPEngine Integration - Phase 1.1 Complete (P1-007)
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __schema_version__ = "episodic_v3"  # Sensory is SMEM_v1
 

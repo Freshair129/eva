@@ -1,8 +1,19 @@
 # MSP Version History
 
 > **Module:** Memory & Soul Passport (MSP)
-> **Current Version:** 0.3.0
+> **Current Version:** 0.4.0
 > **Schema Version:** episodic_v3
+
+---
+
+## [0.4.0] - 2026-01-29
+
+### Added
+- **MSPEngine Integration** (`msp_engine.py`):
+    - Unified entry point for all memory types.
+    - Orchestrated `FileMemoryStore` (Persistence) and `ChromaMemoryStore` (Indexing).
+    - **Hydrated Semantic Search**: Search returns full memory objects from files, not just vector metadata.
+- **Phase 1.1 Milestone Complete**: All core memory schemas and storage mechanisms implemented.
 
 ---
 

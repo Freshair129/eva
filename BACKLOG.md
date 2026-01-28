@@ -10,7 +10,8 @@
 - [x] **P1-004: Sensory Memory Schema** - Define structure for raw perceptual data (visual patterns, audio snippets, qualia).
 - [x] **P1-005: MemoryStore Implementation** - Create the core logic for saving/loading File-per-Record structure.
 - [x] **P1-006: ChromaDB Bridge** - Integrate vector database for semantic retrieval of episodes/turns.
-- [ ] **P1-007: MSP Engine Integration** - Orchestrate all memory types into a single service.
+- [x] **P1-007: MSP Engine Integration** - Orchestrate all memory types into a single service.
+- [ ] **P2-001: Orchestrator Core** - Design the basic request routing and session lifecycle.
 
 ---
 
