@@ -7,6 +7,7 @@ from pathlib import Path
 from contracts.ports.i_memory_storage import IMemoryStorage
 from msp.storage.file_memory_store import FileMemoryStore
 from msp.storage.chroma_store import ChromaMemoryStore
+from msp.crosslink_manager import CrosslinkManager
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class MSPEngine(IMemoryStorage):
         self.base_dir = Path(base_dir)
         self.file_store = FileMemoryStore(base_dir=str(self.base_dir))
         self.vector_store = ChromaMemoryStore(persist_directory=str(self.base_dir / "vector_db"))
+        self.crosslink_manager = CrosslinkManager(storage=self)
 
     def store(self, memory_data: Dict[str, Any]) -> str:
         """
@@ -33,8 +35,12 @@ class MSPEngine(IMemoryStorage):
             self.vector_store.store(memory_data)
         except Exception as e:
             logger.error(f"Failed to index memory {m_id} in Chroma: {e}")
-            # We don't fail the whole operation if indexing fails, 
-            # but we log it for consistency.
+            
+        # 3. Synchronize Crosslinks (Bidirectional)
+        try:
+            self.crosslink_manager.sync_links(memory_data)
+        except Exception as e:
+            logger.error(f"Failed to sync crosslinks for {m_id}: {e}")
             
         return m_id
 

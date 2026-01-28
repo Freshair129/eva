@@ -34,8 +34,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - **MSP Layer (Phase 1) [Implemented by Antigravity]**
     - Established MSP directory structure (`msp/`, `msp/schema/`, `msp/storage/`, `msp/tests/`) (P1-001)
-    - **MSP Schema Evolution (v0.0.1 → v0.4.0) [Implemented by Antigravity]**
+    - **MSP Schema Evolution (v0.0.1 → v0.4.1) [Implemented by Antigravity]**
         - `Episodic`, `Semantic`, `Sensory` Schemas Complete
+        - **Crosslink Manager** (v0.4.1): Automated bidirectional linking between memory types
         - **Phase 1.1 Complete**: All core memory features implemented and integrated.
         - **MSPEngine Integration** (v0.4.0): Unified storage orchestration & hydrated search
         - **ChromaDB Support** (v0.3.0): Integrated vector search for semantic retrieval

@@ -82,6 +82,7 @@ class EpisodicMemory:
     # Turn & Sensory References (IDs only)
     turn_refs: List[str] = field(default_factory=list)     # ["TU_xxx", "TL_xxx"]
     sensory_refs: List[str] = field(default_factory=list)  # ["SMEM_xxx"]
+    semantic_refs: List[str] = field(default_factory=list) # ["SEM_xxx"]
     
     # Structure
     situation_context: Optional[SituationContext] = None
@@ -104,6 +105,7 @@ class EpisodicMemory:
             "event_id": self.event_id,
             "turn_refs": self.turn_refs,
             "sensory_refs": self.sensory_refs,
+            "semantic_refs": self.semantic_refs,
             "situation_context": self.situation_context.to_dict() if self.situation_context else None,
             "summary": self.summary.to_dict() if self.summary else None,
             "workflow_state": self.workflow_state.to_dict() if self.workflow_state else None,
@@ -125,6 +127,7 @@ class EpisodicMemory:
             event_id=data.get("event_id"),
             turn_refs=data.get("turn_refs", []),
             sensory_refs=data.get("sensory_refs", []),
+            semantic_refs=data.get("semantic_refs", []),
             situation_context=SituationContext.from_dict(data["situation_context"]) if data.get("situation_context") else None,
             summary=StructuredSummary.from_dict(data["summary"]) if data.get("summary") else None,
             workflow_state=WorkflowState.from_dict(data["workflow_state"]) if data.get("workflow_state") else None,

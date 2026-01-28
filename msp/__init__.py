@@ -18,8 +18,9 @@ Version History:
 - 0.2.1: WorkflowState for task tracking within episodes
 - 0.3.0: ChromaDB integration for semantic search (P1-006)
 - 0.4.0: MSPEngine Integration - Phase 1.1 Complete (P1-007)
+- 0.4.1: Crosslink Manager - Automated bidirectional linking (P1-008)
 """
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __schema_version__ = "episodic_v3"  # Sensory is SMEM_v1
 

@@ -1,12 +1,18 @@
 # MSP Version History
 
 > **Module:** Memory & Soul Passport (MSP)
-> **Current Version:** 0.4.0
+> **Current Version:** 0.4.1
 > **Schema Version:** episodic_v3
 
 ---
 
-## [0.4.0] - 2026-01-29
+## [0.4.1] - 2026-01-29
+
+### Added
+- **Crosslink Manager** (`crosslink_manager.py`):
+    - Automated bidirectional linking between memory types.
+    - Ensures `EpisodicMemory` captures back-references from `Sensory` and `Semantic` records.
+- **Schema Refinement**: Added `semantic_refs` to `EpisodicMemory`.
 
 ### Added
 - **MSPEngine Integration** (`msp_engine.py`):
