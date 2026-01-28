@@ -34,9 +34,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - **MSP Layer (Phase 1) [Implemented by Antigravity]**
     - Established MSP directory structure (`msp/`, `msp/schema/`, `msp/storage/`, `msp/tests/`) (P1-001)
-    - **MSP Schema Evolution (v0.0.1 → v0.0.9) [Implemented by Antigravity]**
-        - `EpisodicMemory` (P1-002), `SemanticMemory` (P1-003)
+    - **MSP Schema Evolution (v0.0.1 → v0.1.0) [Implemented by Antigravity]**
+        - `EpisodicMemory` (P1-002), `SemanticMemory` (P1-003), `SensoryMemory` (P1-004)
         - V2 Alignment: Nested Turns, Enhanced Context, Structured Summary
+        - Qualia & Physio Snapshots: Captured in Sensory Memory
         - **File-per-Record Architecture** (v0.0.8): Standalone `turn.py` & referenced episodes
         - **MSP Master Specification** (v0.0.9): Added [msp/README.md](msp/README.md) guide
         - See: [msp/VERSION_HISTORY.md](msp/VERSION_HISTORY.md) for full changelog

@@ -12,8 +12,9 @@ Version History:
 - 0.0.5: Enhanced context (location_context, domain_area, mission_goal, agent_role)
 - 0.0.6: StructuredSummary (action_taken, key_outcome, future_implication)
 - 0.0.7: Renamed raw_text to text_excerpt
-- 0.0.9: Added MSP Master Specification (msp/README.md)
+- 0.1.0: SensoryMemory schema (P1-004)
 """
 
-__version__ = "0.0.9"
-__schema_version__ = "episodic_v3"
+__version__ = "0.1.0"
+__schema_version__ = "episodic_v3"  # Sensory is SMEM_v1
+

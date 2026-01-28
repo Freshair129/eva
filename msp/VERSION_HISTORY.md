@@ -6,6 +6,15 @@
 
 ---
 
+## [0.1.0] - 2026-01-29
+
+### Added
+- **SensoryMemory Schema** (`sensory.py`): High-granularity capture of perceptual data.
+- **Qualia Support**: Track subjective experience (color, texture, soundscape, intensity).
+- **Physio Snapshots**: Capture biological state (hormones) at the moment of perception.
+
+---
+
 ## [0.0.9] - 2026-01-29
 
 ### Added
