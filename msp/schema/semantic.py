@@ -77,3 +77,10 @@ class SemanticMemory:
     def as_triple(self) -> str:
         """Return as subject-predicate-object string."""
         return f"{self.subject} {self.predicate} {self.object}"
+
+    def get_file_path(self, base_dir: str = "memory") -> Path:
+        """Generate file path: {base}/semantic/{subject_hash}/{id}.json"""
+        import hashlib
+        # Hash subject to create subfolders and avoid flat directory bottleneck
+        subj_hash = hashlib.md5(self.subject.encode()).hexdigest()[:2]
+        return Path(base_dir) / "semantic" / subj_hash / f"{self.id}.json"

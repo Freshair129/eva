@@ -14,8 +14,9 @@ Version History:
 - 0.0.7: Renamed raw_text to text_excerpt
 - 0.1.0: SensoryMemory schema (P1-004)
 - 0.1.1: Bidirectional Memory Crosslinks (Episodic <-> Sensory <-> Semantic)
+- 0.2.0: FileMemoryStore implementation (P1-005)
 """
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 __schema_version__ = "episodic_v3"  # Sensory is SMEM_v1
 

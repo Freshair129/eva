@@ -8,7 +8,7 @@
 ## 📌 High Priority (Next in Line)
 
 - [x] **P1-004: Sensory Memory Schema** - Define structure for raw perceptual data (visual patterns, audio snippets, qualia).
-- [ ] **P1-005: MemoryStore Implementation** - Create the core logic for saving/loading File-per-Record structure.
+- [x] **P1-005: MemoryStore Implementation** - Create the core logic for saving/loading File-per-Record structure.
 - [ ] **P1-006: ChromaDB Bridge** - Integrate vector database for semantic retrieval of episodes/turns.
 - [ ] **P1-007: MSP Engine Integration** - Orchestrate all memory types into a single service.
 

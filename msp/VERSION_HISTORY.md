@@ -1,8 +1,19 @@
 # MSP Version History
 
 > **Module:** Memory & Soul Passport (MSP)
-> **Current Version:** 0.0.8
+> **Current Version:** 0.2.0
 > **Schema Version:** episodic_v3
+
+---
+
+## [0.2.0] - 2026-01-29
+
+### Added
+- **FileMemoryStore Implementation** (`file_memory_store.py`):
+  - Handles storage/retrieval following Date-based Hierarchy.
+  - Automatic directory creation and routing by `type`.
+  - Supports recursive retrieval by ID.
+  - Basic querying support for Phase 1.
 
 ---
 

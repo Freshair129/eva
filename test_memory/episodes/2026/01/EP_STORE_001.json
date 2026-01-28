@@ -1,0 +1,29 @@
+{
+  "episode_id": "EP_STORE_001",
+  "created_at": "2026-01-29T00:26:42.401226",
+  "persona_id": null,
+  "user_id": null,
+  "session_id": null,
+  "event_id": null,
+  "turn_refs": [
+    "TU_STORE_001"
+  ],
+  "sensory_refs": [
+    "SMEM_STORE_001"
+  ],
+  "situation_context": {
+    "context_id": "ctx_001",
+    "interaction_mode": "testing",
+    "stakes_level": "low",
+    "time_pressure": "low",
+    "location_context": null,
+    "domain_area": null,
+    "mission_goal": null,
+    "agent_role": null
+  },
+  "summary": null,
+  "state_snapshot": {},
+  "tags": [],
+  "cues": [],
+  "type": "episodic_v3"
+}
