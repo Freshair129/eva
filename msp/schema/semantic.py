@@ -38,6 +38,9 @@ class SemanticMemory:
     learned_at: datetime = field(default_factory=datetime.now)
     last_accessed: Optional[datetime] = None
     access_count: int = 0
+    
+    # Evidence links (Crosslink Semantic -> Episodic)
+    episode_refs: List[str] = field(default_factory=list)  # ["EP_xxx"]
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage."""
@@ -48,6 +51,7 @@ class SemanticMemory:
             "object": self.object,
             "confidence": self.confidence,
             "source": self.source,
+            "episode_refs": self.episode_refs,
             "learned_at": self.learned_at.isoformat(),
             "last_accessed": self.last_accessed.isoformat() if self.last_accessed else None,
             "access_count": self.access_count,
@@ -64,6 +68,7 @@ class SemanticMemory:
             object=data["object"],
             confidence=data.get("confidence", 0.8),
             source=data.get("source", "conversation"),
+            episode_refs=data.get("episode_refs", []),
             learned_at=datetime.fromisoformat(data["learned_at"]),
             last_accessed=datetime.fromisoformat(data["last_accessed"]) if data.get("last_accessed") else None,
             access_count=data.get("access_count", 0)

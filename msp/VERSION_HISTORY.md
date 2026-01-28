@@ -6,6 +6,17 @@
 
 ---
 
+## [0.1.1] - 2026-01-29
+
+### Added
+- **Bidirectional Crosslinks**:
+  - `EpisodicMemory` now tracks `sensory_refs`.
+  - `SensoryMemory` now tracks `concept_refs`.
+  - `SemanticMemory` now tracks `episode_refs` (as evidence).
+- **Crosslink Visualization**: Added Mermaid diagram to `msp/README.md`.
+
+---
+
 ## [0.1.0] - 2026-01-29
 
 ### Added

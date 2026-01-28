@@ -12,6 +12,18 @@ MSP is the unified memory system for EVA. It manages three types of memories:
 2. **Semantic**: Factual knowledge (Subject-Predicate-Object).
 3. **Sensory**: Raw perceptual data and Qualia (subjective experience).
 
+### 🔄 Memory Crosslinks (ADR-Pending)
+Bidirectional linking allows the system to traverse from raw data to meaning and back.
+
+```mermaid
+graph LR
+    E[Episodic] -- "sensory_refs" --> S[Sensory]
+    S -- "episode_id" --> E
+    S -- "concept_refs" --> K[Semantic]
+    K -- "episode_refs" --> E
+    E -- "turn_refs" --> T[Turns]
+```
+
 ---
 
 ## 2. Episodic Memory Schema (V3)
@@ -21,8 +33,9 @@ Stored in `memory/episodes/`. Each file contains metadata and references to turn
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
 | `episode_id` | `str` | Unique ID of the episode | `EP_20260128_001` |
-| `turn_refs` | `List[str]` | IDs of turns belonging to this episode | `["TU_001", "TL_001"]` |
-| `persona_id` | `str` | Which "ร่าง" of EVA was used | `EVA_01` (Senior Dev) |
+| `turn_refs` | `List[str]` | IDs of turns (TU/TL) | `["TU_001", "TL_001"]` |
+| `sensory_refs` | `List[str]` | IDs of sensory records | `["SMEM_001"]` |
+| `persona_id` | `str` | Which "ร่าง" of EVA | `EVA_01` |
 | `event_id` | `str` | Grouping ID for series of episodes | `resume_writing_trip` |
 | `situation_context` | `Obj` | Environmental/Contextual metadata | See Section 2.2 |
 | `summary` | `Obj` | Deeply structured summary | See Section 2.3 |
@@ -64,6 +77,7 @@ Stored in a graph-ready format.
 | `subject` | The entity | `User (Freshair)` |
 | `predicate` | The relationship | `likes` |
 | `object` | The target value | `Sushi` |
+| `episode_refs` | Evidence links | `["EP_001"]` |
 | `confidence` | How sure are we? | `0.95` |
 
 ---
@@ -75,9 +89,10 @@ Stored in `memory/turns/sensory/`. Captures "Qualia" (the feeling of now).
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
 | `sensory_id` | `str` | Unique ID | `SMEM_20260129_001` |
-| `episode_id` | `str` | Link to Episode | `EP_20260128_001` |
+| `episode_id` | `str` | Link to Episode (Source) | `EP_20260128_001` |
 | `data_type` | `str` | format | `image`, `audio`, `visual_pattern` |
 | `qualia` | `Obj` | Subjective experience | See 5.2 |
+| `concept_refs` | `List[str]` | Extracted Semantic facts | `["sem_abc123"]` |
 | `physio_snapshot` | `Dict` | Hormones at time T | `{"dopamine": 0.5, ...}` |
 
 ### 5.2 Qualia (Phenomenology)

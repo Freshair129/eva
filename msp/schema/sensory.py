@@ -41,6 +41,9 @@ class SensoryMemory:
     qualia: Optional[Qualia] = None
     extracted_features: Dict[str, Any] = field(default_factory=dict)
     
+    # Crosslinks
+    concept_refs: List[str] = field(default_factory=list)  # Link to Semantic Memory ["sem_xxx"]
+    
     # Biological state at time of perception
     physio_snapshot: Dict[str, Any] = field(default_factory=dict)
     
@@ -56,6 +59,7 @@ class SensoryMemory:
             "raw_data_ref": self.raw_data_ref,
             "qualia": self.qualia.to_dict() if self.qualia else None,
             "extracted_features": self.extracted_features,
+            "concept_refs": self.concept_refs,
             "physio_snapshot": self.physio_snapshot,
             "created_at": self.created_at.isoformat(),
             "source": self.source,
@@ -71,6 +75,7 @@ class SensoryMemory:
             raw_data_ref=data.get("raw_data_ref"),
             qualia=Qualia.from_dict(data["qualia"]) if data.get("qualia") else None,
             extracted_features=data.get("extracted_features", {}),
+            concept_refs=data.get("concept_refs", []),
             physio_snapshot=data.get("physio_snapshot", {}),
             created_at=datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now(),
             source=data.get("source", "perception")

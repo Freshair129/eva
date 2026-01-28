@@ -25,6 +25,8 @@ An Architecture Decision Record captures a single architectural decision along w
 | [ADR-002](ADR-002_flat_anatomy.md) | Flat Anatomy Structure | Accepted | 2026-01-27 |
 | [ADR-003](ADR-003_walking_skeleton.md) | Walking Skeleton Approach | Accepted | 2026-01-27 |
 | [ADR-004](ADR-004_version_reset.md) | Version Reset to 0.1.0 | Accepted | 2026-01-27 |
+| [ADR-005](ADR-005_file_per_record.md) | File-per-Record Architecture | Accepted | 2026-01-28 |
+| [ADR-006](ADR-006_module_versioning.md) | Module-level Versioning | Accepted | 2026-01-28 |
 
 ---
 

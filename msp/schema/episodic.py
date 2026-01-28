@@ -64,8 +64,9 @@ class EpisodicMemory:
     session_id: Optional[str] = None
     event_id: Optional[str] = None
     
-    # Turn References (IDs only, not embedded)
-    turn_refs: List[str] = field(default_factory=list)  # ["TU_xxx", "TL_xxx"]
+    # Turn & Sensory References (IDs only)
+    turn_refs: List[str] = field(default_factory=list)     # ["TU_xxx", "TL_xxx"]
+    sensory_refs: List[str] = field(default_factory=list)  # ["SMEM_xxx"]
     
     # Structure
     situation_context: Optional[SituationContext] = None
@@ -86,6 +87,7 @@ class EpisodicMemory:
             "session_id": self.session_id,
             "event_id": self.event_id,
             "turn_refs": self.turn_refs,
+            "sensory_refs": self.sensory_refs,
             "situation_context": self.situation_context.to_dict() if self.situation_context else None,
             "summary": self.summary.to_dict() if self.summary else None,
             "state_snapshot": self.state_snapshot,
@@ -105,6 +107,7 @@ class EpisodicMemory:
             session_id=data.get("session_id"),
             event_id=data.get("event_id"),
             turn_refs=data.get("turn_refs", []),
+            sensory_refs=data.get("sensory_refs", []),
             situation_context=SituationContext.from_dict(data["situation_context"]) if data.get("situation_context") else None,
             summary=StructuredSummary.from_dict(data["summary"]) if data.get("summary") else None,
             state_snapshot=data.get("state_snapshot", {}),
