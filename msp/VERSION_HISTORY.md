@@ -1,8 +1,18 @@
 # MSP Version History
 
 > **Module:** Memory & Soul Passport (MSP)
-> **Current Version:** 0.2.0
+> **Current Version:** 0.2.1
 > **Schema Version:** episodic_v3
+
+---
+
+## [0.2.1] - 2026-01-29
+
+### Added
+- **WorkflowState Schema** (`episodic.py`):
+  - Added internal task tracking to `EpisodicMemory`.
+  - Tracks `current_task`, `completed_items`, and `pending_items`.
+  - Built-in serialization (`to_dict`/`from_dict`).
 
 ---
 

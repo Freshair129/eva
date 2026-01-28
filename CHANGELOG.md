@@ -34,11 +34,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - **MSP Layer (Phase 1) [Implemented by Antigravity]**
     - Established MSP directory structure (`msp/`, `msp/schema/`, `msp/storage/`, `msp/tests/`) (P1-001)
-    - **MSP Schema Evolution (v0.0.1 → v0.2.0) [Implemented by Antigravity]**
-        - `EpisodicMemory`, `SemanticMemory`, `SensoryMemory` Complete
+    - **MSP Schema Evolution (v0.0.1 → v0.2.1) [Implemented by Antigravity]**
+        - ...
+        - **Workflow Tracking** (v0.2.1): Added `WorkflowState` to episodes for task management
         - **MemoryStore Implementation** (v0.2.0): Core logic for File-per-Record storage
         - **Memory Crosslinks** (v0.1.1): Bidirectional linking between all memory types
-        - **MSP Master Specification** (v0.0.9): Comprehensive design guide
         - See: [msp/VERSION_HISTORY.md](msp/VERSION_HISTORY.md) for full changelog
 
 

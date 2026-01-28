@@ -39,6 +39,7 @@ Stored in `memory/episodes/`. Each file contains metadata and references to turn
 | `event_id` | `str` | Grouping ID for series of episodes | `resume_writing_trip` |
 | `situation_context` | `Obj` | Environmental/Contextual metadata | See Section 2.2 |
 | `summary` | `Obj` | Deeply structured summary | See Section 2.3 |
+| `workflow_state` | `Obj` | Internal task tracking | See Section 2.4 |
 
 ### 2.2 SituationContext (The "Why" & "Where")
 Prevents AI from using wrong "mode" or "tone".
@@ -51,6 +52,12 @@ Prevents AI from using wrong "mode" or "tone".
 - `action_taken`: "Analyzed user's portfolio" (What happened).
 - `key_outcome`: "Selected Inter font" (What was decided).
 - `future_implication`: "Must update CSS in next turn" (What to do next).
+
+### 2.4 WorkflowState (The "Task Tracker") [New v0.2.1]
+Tracks the agent's internal progress within a mission.
+- `current_task`: The specific item being worked on right now.
+- `completed_items`: List of tasks finished in this session/mission.
+- `pending_items`: List of tasks remaining to achieve the `mission_goal`.
 
 ---
 
@@ -127,6 +134,11 @@ Stored in `memory/turns/sensory/`. Captures "Qualia" (the feeling of now).
     "action_taken": "Proposed File-per-Record architecture",
     "key_outcome": "User approved the change",
     "future_implication": "Redesign episodic.py"
+  },
+  "workflow_state": {
+    "current_task": "Update episodic schema",
+    "completed_items": ["Research ADR-005"],
+    "pending_items": ["Update verify_episodic.py", "Commit changes"]
   }
 }
 ```

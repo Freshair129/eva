@@ -45,6 +45,21 @@ class StructuredSummary:
 
 
 @dataclass
+class WorkflowState:
+    """Internal task tracking for the agent during a mission."""
+    current_task: Optional[str] = None
+    completed_items: List[str] = field(default_factory=list)
+    pending_items: List[str] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "WorkflowState":
+        return cls(**data)
+
+
+@dataclass
 class EpisodicMemory:
     """
     Represents an autobiographical memory (File-per-Record).
@@ -71,6 +86,7 @@ class EpisodicMemory:
     # Structure
     situation_context: Optional[SituationContext] = None
     summary: Optional[StructuredSummary] = None
+    workflow_state: Optional[WorkflowState] = None
     state_snapshot: Dict[str, Any] = field(default_factory=dict)
     
     # High-Level Helpers
@@ -90,6 +106,7 @@ class EpisodicMemory:
             "sensory_refs": self.sensory_refs,
             "situation_context": self.situation_context.to_dict() if self.situation_context else None,
             "summary": self.summary.to_dict() if self.summary else None,
+            "workflow_state": self.workflow_state.to_dict() if self.workflow_state else None,
             "state_snapshot": self.state_snapshot,
             "tags": self.tags,
             "cues": self.cues,
@@ -110,6 +127,7 @@ class EpisodicMemory:
             sensory_refs=data.get("sensory_refs", []),
             situation_context=SituationContext.from_dict(data["situation_context"]) if data.get("situation_context") else None,
             summary=StructuredSummary.from_dict(data["summary"]) if data.get("summary") else None,
+            workflow_state=WorkflowState.from_dict(data["workflow_state"]) if data.get("workflow_state") else None,
             state_snapshot=data.get("state_snapshot", {}),
             tags=data.get("tags", []),
             cues=data.get("cues", [])
