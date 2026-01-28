@@ -1,0 +1,74 @@
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Callable, Optional, List
+
+class IBus(ABC):
+    """
+    Port interface for the message bus.
+
+    Provides pub/sub communication between systems.
+    Systems should not call each other directly - use the bus.
+
+    Implementors:
+    - SimpleBus (Phase 0) - In-memory, no persistence
+    - ResonanceBus (Phase 5) - Full featured
+    """
+
+    @abstractmethod
+    def publish(self, channel: str, payload: Dict[str, Any]) -> None:
+        """
+        Publishes a payload to a channel.
+
+        Args:
+            channel: Channel name (e.g., 'bus:physical')
+            payload: Data to publish
+        """
+        pass
+
+    @abstractmethod
+    def subscribe(
+        self,
+        channel: str,
+        callback: Callable[[Dict[str, Any]], None]
+    ) -> str:
+        """
+        Subscribes to a channel.
+
+        Args:
+            channel: Channel name to subscribe to
+            callback: Function to call when message received
+
+        Returns:
+            Subscription ID (for unsubscribe)
+        """
+        pass
+
+    @abstractmethod
+    def unsubscribe(self, subscription_id: str) -> bool:
+        """
+        Unsubscribes from a channel.
+
+        Args:
+            subscription_id: ID returned from subscribe()
+
+        Returns:
+            True if unsubscribed, False if not found
+        """
+        pass
+
+    @abstractmethod
+    def get_latest(self, channel: str) -> Optional[Dict[str, Any]]:
+        """
+        Gets the most recent message on a channel.
+
+        Args:
+            channel: Channel name
+
+        Returns:
+            Latest payload or None if no messages
+        """
+        pass
+
+    @abstractmethod
+    def list_channels(self) -> List[str]:
+        """Returns list of active channels."""
+        pass

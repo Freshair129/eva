@@ -1,0 +1,48 @@
+# Task: Create Perception Directory
+id: P5-001
+phase: 5
+title: "Create Perception directory structure"
+status: pending
+priority: high
+estimated_lines: 10
+
+description: |
+  Create Perception (RMS, Qualia) directory structure.
+
+output_files:
+  - "perception/__init__.py"
+  - "perception/rms/__init__.py"
+  - "perception/qualia/__init__.py"
+  - "perception/schema/__init__.py"
+  - "perception/tests/__init__.py"
+
+spec: |
+  ```
+  perception/
+  ├── __init__.py
+  ├── rms/
+  │   └── __init__.py
+  ├── qualia/
+  │   └── __init__.py
+  ├── schema/
+  │   └── __init__.py
+  └── tests/
+      └── __init__.py
+  ```
+
+  ## perception/__init__.py
+  ```python
+  """
+  Perception - Resonance Memory System & Qualia
+
+  Sensory experience encoding and phenomenological qualities.
+  """
+  __version__ = "0.1.0"
+  ```
+
+acceptance_criteria:
+  - perception/ directory exists
+  - All subdirectories created
+
+depends_on: []
+blocks: [P5-002, P5-003]

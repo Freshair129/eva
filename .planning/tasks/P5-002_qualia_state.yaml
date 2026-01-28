@@ -1,0 +1,114 @@
+# Task: Define QualiaState Schema
+id: P5-002
+phase: 5
+title: "Define QualiaState schema"
+status: pending
+priority: high
+estimated_lines: 80
+
+description: |
+  Define QualiaState for phenomenological experience.
+  Texture, color, soundscape qualities.
+
+output_file: "perception/schema/qualia_state.py"
+
+spec: |
+  ```python
+  """QualiaState Schema - Phenomenological experience."""
+
+  from dataclasses import dataclass, field
+  from datetime import datetime
+  from typing import Dict, Any
+
+
+  @dataclass
+  class TextureQualia:
+      """Texture qualities."""
+      roughness: float = 0.5    # Smooth (0) to Rough (1)
+      temperature: float = 0.5  # Cold (0) to Warm (1)
+      weight: float = 0.5       # Light (0) to Heavy (1)
+      sharpness: float = 0.5    # Soft (0) to Sharp (1)
+
+      def to_dict(self) -> Dict[str, float]:
+          return {
+              "roughness": self.roughness,
+              "temperature": self.temperature,
+              "weight": self.weight,
+              "sharpness": self.sharpness
+          }
+
+
+  @dataclass
+  class ColorQualia:
+      """Color/visual qualities."""
+      hue: float = 0.5          # Color wheel position (0-1)
+      saturation: float = 0.5   # Grey (0) to Vivid (1)
+      brightness: float = 0.5   # Dark (0) to Bright (1)
+      warmth: float = 0.5       # Cool colors (0) to Warm colors (1)
+
+      def to_dict(self) -> Dict[str, float]:
+          return {
+              "hue": self.hue,
+              "saturation": self.saturation,
+              "brightness": self.brightness,
+              "warmth": self.warmth
+          }
+
+
+  @dataclass
+  class SoundscapeQualia:
+      """Sound/auditory qualities."""
+      pitch: float = 0.5        # Low (0) to High (1)
+      volume: float = 0.5       # Quiet (0) to Loud (1)
+      rhythm: float = 0.5       # Slow (0) to Fast (1)
+      harmony: float = 0.5      # Dissonant (0) to Harmonious (1)
+
+      def to_dict(self) -> Dict[str, float]:
+          return {
+              "pitch": self.pitch,
+              "volume": self.volume,
+              "rhythm": self.rhythm,
+              "harmony": self.harmony
+          }
+
+
+  @dataclass
+  class QualiaState:
+      """
+      Complete phenomenological state.
+
+      Represents the subjective experience qualities.
+      """
+
+      texture: TextureQualia = field(default_factory=TextureQualia)
+      color: ColorQualia = field(default_factory=ColorQualia)
+      soundscape: SoundscapeQualia = field(default_factory=SoundscapeQualia)
+      intensity: float = 0.5  # Overall sensory intensity
+      timestamp: datetime = field(default_factory=datetime.now)
+
+      def to_dict(self) -> Dict[str, Any]:
+          return {
+              "texture": self.texture.to_dict(),
+              "color": self.color.to_dict(),
+              "soundscape": self.soundscape.to_dict(),
+              "intensity": self.intensity,
+              "timestamp": self.timestamp.isoformat()
+          }
+
+      @classmethod
+      def from_dict(cls, data: Dict[str, Any]) -> "QualiaState":
+          return cls(
+              texture=TextureQualia(**data.get("texture", {})),
+              color=ColorQualia(**data.get("color", {})),
+              soundscape=SoundscapeQualia(**data.get("soundscape", {})),
+              intensity=data.get("intensity", 0.5)
+          )
+  ```
+
+acceptance_criteria:
+  - File at perception/schema/qualia_state.py
+  - TextureQualia, ColorQualia, SoundscapeQualia
+  - QualiaState combines all
+
+depends_on: [P5-001]
+blocks: [P5-003, P5-006]

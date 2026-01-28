@@ -1,0 +1,145 @@
+# Task: Performance Optimization
+id: P7-008
+phase: 7
+title: "Performance optimization"
+status: pending
+priority: medium
+estimated_lines: 100
+
+description: |
+  Optimize performance for production use.
+  Target: < 2s response time with local LLM.
+
+output_file: "api/middleware/performance.py"
+
+spec: |
+  ```python
+  """Performance Middleware and Utilities."""
+
+  import time
+  import logging
+  from functools import wraps
+  from typing import Callable, Any
+  from fastapi import Request
+  from starlette.middleware.base import BaseHTTPMiddleware
+
+  logger = logging.getLogger("eva.performance")
+
+
+  class TimingMiddleware(BaseHTTPMiddleware):
+      """Middleware to log request timing."""
+
+      async def dispatch(self, request: Request, call_next):
+          start = time.perf_counter()
+
+          response = await call_next(request)
+
+          duration = time.perf_counter() - start
+          logger.info(
+              f"{request.method} {request.url.path} - {duration:.3f}s"
+          )
+
+          # Add timing header
+          response.headers["X-Response-Time"] = f"{duration:.3f}s"
+
+          return response
+
+
+  def timed(func: Callable) -> Callable:
+      """Decorator to time function execution."""
+
+      @wraps(func)
+      def wrapper(*args, **kwargs) -> Any:
+          start = time.perf_counter()
+          result = func(*args, **kwargs)
+          duration = time.perf_counter() - start
+          logger.debug(f"{func.__name__} took {duration:.3f}s")
+          return result
+
+      return wrapper
+
+
+  class PerformanceMonitor:
+      """
+      Tracks performance metrics.
+      """
+
+      def __init__(self):
+          self._metrics = {
+              "total_requests": 0,
+              "total_time": 0.0,
+              "llm_calls": 0,
+              "llm_time": 0.0,
+              "memory_queries": 0,
+              "memory_time": 0.0
+          }
+
+      def record_request(self, duration: float) -> None:
+          """Record a request."""
+          self._metrics["total_requests"] += 1
+          self._metrics["total_time"] += duration
+
+      def record_llm_call(self, duration: float) -> None:
+          """Record an LLM call."""
+          self._metrics["llm_calls"] += 1
+          self._metrics["llm_time"] += duration
+
+      def record_memory_query(self, duration: float) -> None:
+          """Record a memory query."""
+          self._metrics["memory_queries"] += 1
+          self._metrics["memory_time"] += duration
+
+      def get_metrics(self) -> dict:
+          """Get all metrics."""
+          metrics = self._metrics.copy()
+
+          # Calculate averages
+          if metrics["total_requests"] > 0:
+              metrics["avg_request_time"] = (
+                  metrics["total_time"] / metrics["total_requests"]
+              )
+          else:
+              metrics["avg_request_time"] = 0
+
+          if metrics["llm_calls"] > 0:
+              metrics["avg_llm_time"] = (
+                  metrics["llm_time"] / metrics["llm_calls"]
+              )
+          else:
+              metrics["avg_llm_time"] = 0
+
+          return metrics
+
+      def reset(self) -> None:
+          """Reset all metrics."""
+          for key in self._metrics:
+              self._metrics[key] = 0 if isinstance(self._metrics[key], int) else 0.0
+
+
+  # Global monitor instance
+  monitor = PerformanceMonitor()
+
+
+  # Performance tips for optimization:
+  #
+  # 1. ChromaDB: Use persistent storage to avoid re-embedding
+  # 2. LLM: Use smaller context window when possible
+  # 3. Bus: Use async for non-critical updates
+  # 4. Memory: Batch memory operations
+  # 5. State: Cache state snapshots
+  ```
+
+acceptance_criteria:
+  - File at api/middleware/performance.py
+  - TimingMiddleware logs request times
+  - PerformanceMonitor tracks metrics
+  - Can identify slow operations
+
+depends_on: [P7-007]
+blocks: []
+
+notes: |
+  Performance targets:
+  - Simple chat response: < 500ms (with mock LLM)
+  - Full flow with local LLM: < 2s
+  - Memory recall: < 100ms

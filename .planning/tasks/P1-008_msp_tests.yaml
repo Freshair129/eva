@@ -1,0 +1,265 @@
+# Task: MSP Unit Tests
+id: P1-008
+phase: 1
+title: "MSP unit tests"
+status: pending
+priority: medium
+estimated_lines: 100
+
+# Description
+description: |
+  Create comprehensive unit tests for the MSP module.
+  Tests should cover:
+  - Schema dataclasses
+  - MemoryStore operations
+  - ChromaBridge operations
+  - MSPEngine integration
+
+# Output Files
+output_files:
+  - "msp/tests/test_schemas.py"
+  - "msp/tests/test_memory_store.py"
+  - "msp/tests/test_msp_engine.py"
+
+# Specification
+spec: |
+  ## msp/tests/test_schemas.py
+  ```python
+  """Tests for MSP schemas."""
+
+  import pytest
+  from datetime import datetime
+
+  from msp.schema.episodic import EpisodicMemory
+  from msp.schema.semantic import SemanticMemory
+  from msp.schema.sensory import SensoryMemory
+
+
+  class TestEpisodicMemory:
+      """Tests for EpisodicMemory schema."""
+
+      def test_create_episodic(self):
+          """Can create episodic memory with required fields."""
+          mem = EpisodicMemory(
+              content="We talked about AI",
+              summary="AI discussion"
+          )
+          assert mem.content == "We talked about AI"
+          assert mem.id.startswith("ep_")
+
+      def test_to_dict_and_back(self):
+          """Can serialize and deserialize."""
+          mem = EpisodicMemory(
+              content="Test content",
+              summary="Test",
+              importance=0.8
+          )
+          data = mem.to_dict()
+          restored = EpisodicMemory.from_dict(data)
+          assert restored.content == mem.content
+          assert restored.importance == mem.importance
+
+
+  class TestSemanticMemory:
+      """Tests for SemanticMemory schema."""
+
+      def test_create_semantic(self):
+          """Can create semantic memory."""
+          mem = SemanticMemory(
+              subject="User",
+              predicate="likes",
+              object="Python"
+          )
+          assert mem.as_triple() == "User likes Python"
+          assert mem.id.startswith("sem_")
+
+      def test_confidence_default(self):
+          """Default confidence is 0.8."""
+          mem = SemanticMemory(
+              subject="X",
+              predicate="is",
+              object="Y"
+          )
+          assert mem.confidence == 0.8
+
+
+  class TestSensoryMemory:
+      """Tests for SensoryMemory schema."""
+
+      def test_create_sensory(self):
+          """Can create sensory memory."""
+          mem = SensoryMemory(
+              linked_episodic_id="ep_12345678",
+              texture={"warmth": 0.7},
+              intensity=0.6
+          )
+          assert mem.linked_episodic_id == "ep_12345678"
+          assert mem.texture["warmth"] == 0.7
+  ```
+
+  ## msp/tests/test_memory_store.py
+  ```python
+  """Tests for MemoryStore."""
+
+  import pytest
+  from pathlib import Path
+  import tempfile
+
+  from msp.storage.memory_store import MemoryStore
+  from msp.schema.episodic import EpisodicMemory
+  from msp.schema.semantic import SemanticMemory
+
+
+  @pytest.fixture
+  def store():
+      """Fresh memory store."""
+      s = MemoryStore()
+      yield s
+      s.clear()
+
+
+  class TestMemoryStore:
+      """Tests for MemoryStore."""
+
+      def test_store_and_retrieve_episodic(self, store):
+          """Can store and retrieve episodic memory."""
+          mem = EpisodicMemory(content="Hello", summary="Greeting")
+          mem_id = store.store(mem)
+
+          retrieved = store.retrieve(mem_id)
+          assert retrieved is not None
+          assert retrieved.content == "Hello"
+
+      def test_store_and_retrieve_semantic(self, store):
+          """Can store and retrieve semantic memory."""
+          mem = SemanticMemory(
+              subject="EVA",
+              predicate="is",
+              object="an AI"
+          )
+          mem_id = store.store(mem)
+
+          retrieved = store.retrieve(mem_id)
+          assert retrieved.as_triple() == "EVA is an AI"
+
+      def test_delete(self, store):
+          """Can delete memory."""
+          mem = EpisodicMemory(content="To delete", summary="Del")
+          mem_id = store.store(mem)
+
+          assert store.delete(mem_id) is True
+          assert store.retrieve(mem_id) is None
+
+      def test_list_by_type(self, store):
+          """Can list memories by type."""
+          store.store(EpisodicMemory(content="Ep1", summary="S1"))
+          store.store(EpisodicMemory(content="Ep2", summary="S2"))
+          store.store(SemanticMemory(subject="A", predicate="is", object="B"))
+
+          episodic = store.list_by_type("episodic")
+          semantic = store.list_by_type("semantic")
+
+          assert len(episodic) == 2
+          assert len(semantic) == 1
+
+      def test_search(self, store):
+          """Basic search works."""
+          store.store(EpisodicMemory(content="I love Python", summary="Python"))
+          store.store(EpisodicMemory(content="Java is okay", summary="Java"))
+
+          results = store.search("Python")
+          assert len(results) == 1
+          assert "Python" in results[0].content
+  ```
+
+  ## msp/tests/test_msp_engine.py
+  ```python
+  """Tests for MSPEngine."""
+
+  import pytest
+
+  from msp.msp_engine import MSPEngine
+
+
+  @pytest.fixture
+  def engine():
+      """Fresh MSP engine."""
+      e = MSPEngine()
+      yield e
+      e.clear()
+
+
+  class TestMSPEngine:
+      """Tests for MSPEngine."""
+
+      def test_store_and_recall_episodic(self, engine):
+          """Can store and recall episodic memory."""
+          mem = engine.store_episodic(
+              content="We discussed machine learning models",
+              summary="ML discussion",
+              importance=0.7
+          )
+
+          results = engine.recall("machine learning", limit=5)
+          assert len(results) > 0
+          assert any(m.id == mem.id for m in results)
+
+      def test_store_semantic(self, engine):
+          """Can store semantic facts."""
+          mem = engine.store_semantic(
+              subject="User",
+              predicate="prefers",
+              object="dark mode"
+          )
+
+          assert mem.as_triple() == "User prefers dark mode"
+
+          # Should be recallable
+          results = engine.recall("dark mode")
+          assert len(results) > 0
+
+      def test_store_sensory(self, engine):
+          """Can store sensory data."""
+          ep = engine.store_episodic(
+              content="A warm conversation",
+              summary="Warm talk"
+          )
+
+          sensory = engine.store_sensory(
+              linked_episodic_id=ep.id,
+              texture={"warmth": 0.9},
+              intensity=0.7
+          )
+
+          assert sensory.linked_episodic_id == ep.id
+
+      def test_forget(self, engine):
+          """Can forget memories."""
+          mem = engine.store_episodic(
+              content="Something to forget",
+              summary="Forget me"
+          )
+
+          assert engine.forget(mem.id) is True
+          assert engine.get(mem.id) is None
+
+      def test_list_memories(self, engine):
+          """Can list all memories of a type."""
+          engine.store_episodic(content="Ep1", summary="S1")
+          engine.store_episodic(content="Ep2", summary="S2")
+          engine.store_semantic(subject="A", predicate="is", object="B")
+
+          episodic = engine.list_memories("episodic")
+          assert len(episodic) == 2
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - All test files created
+  - Tests cover schemas, store, and engine
+  - Running `pytest msp/tests/` passes
+  - At least 10 test cases
+
+# Dependencies
+depends_on: [P1-007]
+blocks: []

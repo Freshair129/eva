@@ -1,0 +1,197 @@
+# Task: Create RMS Engine
+id: P5-007
+phase: 5
+title: "Create RMS Engine (real encoder)"
+status: pending
+priority: high
+estimated_lines: 150
+
+description: |
+  Create the Resonance Memory System engine.
+  Real implementation replacing MockResonanceEncoder.
+  Calculates L1-L5 resonance scores.
+
+output_file: "perception/rms/rms_engine.py"
+
+spec: |
+  ```python
+  """RMS Engine - Resonance Memory System."""
+
+  from typing import Dict, Any, List
+  from dataclasses import dataclass
+  from contracts.ports.i_resonance_encoder import IResonanceEncoder
+
+
+  @dataclass
+  class ResonanceScore:
+      """Multi-level resonance score."""
+      l1_sentiment: float      # Basic sentiment (0-1)
+      l2_depth: Dict[str, float]  # Emotional depth
+      l3_relational: float     # Relational resonance
+      l4_qualia: float         # Qualia richness
+      l5_transcendent: float   # Meta-cognitive resonance
+
+      @property
+      def total(self) -> float:
+          """Weighted total score."""
+          return (
+              self.l1_sentiment * 0.1 +
+              sum(self.l2_depth.values()) / max(len(self.l2_depth), 1) * 0.2 +
+              self.l3_relational * 0.25 +
+              self.l4_qualia * 0.25 +
+              self.l5_transcendent * 0.2
+          )
+
+      def to_dict(self) -> Dict[str, Any]:
+          return {
+              "l1_sentiment": self.l1_sentiment,
+              "l2_depth": self.l2_depth,
+              "l3_relational": self.l3_relational,
+              "l4_qualia": self.l4_qualia,
+              "l5_transcendent": self.l5_transcendent,
+              "total": self.total
+          }
+
+
+  class RMSEngine(IResonanceEncoder):
+      """
+      Resonance Memory System Engine.
+
+      Implements multi-level resonance scoring:
+      - L1: Basic sentiment analysis
+      - L2: Emotional depth (warmth, playfulness, nostalgia)
+      - L3: Relational resonance (empathy, shared experience)
+      - L4: Qualia resonance (sensory richness)
+      - L5: Transcendent (meta-cognition, paradox resolution)
+      """
+
+      def __init__(self, qualia_engine=None):
+          """
+          Initialize RMS.
+
+          Args:
+              qualia_engine: Optional QualiaEngine for L4 scoring
+          """
+          self._qualia_engine = qualia_engine
+
+      def encode(self, content: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+          """
+          Encode content with resonance scores.
+
+          Args:
+              content: Text content to encode
+              context: Optional context (psych_state, physio_state, etc.)
+
+          Returns:
+              Dict with resonance encoding
+          """
+          context = context or {}
+          score = self.calculate_resonance(content, context)
+
+          return {
+              "content": content,
+              "resonance": score.to_dict(),
+              "total_score": score.total
+          }
+
+      def calculate_resonance(self, content: str,
+                              context: Dict[str, Any]) -> ResonanceScore:
+          """
+          Calculate multi-level resonance score.
+
+          Args:
+              content: Text to analyze
+              context: Context dict with states
+
+          Returns:
+              ResonanceScore
+          """
+          l1 = self._calculate_l1(content)
+          l2 = self._calculate_l2(content, context)
+          l3 = self._calculate_l3(content, context)
+          l4 = self._calculate_l4(context)
+          l5 = self._calculate_l5(content, context)
+
+          return ResonanceScore(
+              l1_sentiment=l1,
+              l2_depth=l2,
+              l3_relational=l3,
+              l4_qualia=l4,
+              l5_transcendent=l5
+          )
+
+      def _calculate_l1(self, content: str) -> float:
+          """L1: Basic sentiment (simple keyword analysis)."""
+          positive = ["happy", "love", "good", "great", "joy", "wonderful", "thanks"]
+          negative = ["sad", "hate", "bad", "terrible", "angry", "sorry", "pain"]
+
+          content_lower = content.lower()
+          pos_count = sum(1 for w in positive if w in content_lower)
+          neg_count = sum(1 for w in negative if w in content_lower)
+
+          if pos_count + neg_count == 0:
+              return 0.5
+          return (pos_count + 0.5) / (pos_count + neg_count + 1)
+
+      def _calculate_l2(self, content: str, context: Dict) -> Dict[str, float]:
+          """L2: Emotional depth dimensions."""
+          psych = context.get("psych_state", {})
+
+          warmth = psych.get("warmth", 0)
+          # Simple playfulness detection
+          playful = 0.3 if any(w in content.lower() for w in ["haha", "lol", "!", "fun"]) else 0.0
+          # Nostalgia
+          nostalgic = 0.3 if any(w in content.lower() for w in ["remember", "used to", "back when"]) else 0.0
+
+          return {
+              "warmth": (warmth + 1) / 2,  # Normalize to 0-1
+              "playfulness": playful,
+              "nostalgia": nostalgic
+          }
+
+      def _calculate_l3(self, content: str, context: Dict) -> float:
+          """L3: Relational resonance."""
+          # Check for relational markers
+          relational_words = ["we", "us", "together", "share", "feel", "understand"]
+          count = sum(1 for w in relational_words if w in content.lower())
+
+          psych = context.get("psych_state", {})
+          trust = (psych.get("trust", 0) + 1) / 2
+
+          return min(1.0, count * 0.15 + trust * 0.4)
+
+      def _calculate_l4(self, context: Dict) -> float:
+          """L4: Qualia richness."""
+          if self._qualia_engine:
+              qualia_state = self._qualia_engine.get_current_state()
+              if qualia_state:
+                  return qualia_state.intensity
+
+          # Fallback: estimate from arousal
+          psych = context.get("psych_state", {})
+          arousal = abs(psych.get("arousal", 0))
+          return 0.3 + arousal * 0.4
+
+      def _calculate_l5(self, content: str, context: Dict) -> float:
+          """L5: Transcendent/meta-cognitive resonance."""
+          # Meta-cognitive markers
+          meta_words = ["think about", "realize", "understand", "meaning", "why"]
+          count = sum(1 for w in meta_words if w in content.lower())
+
+          # Paradox/complexity
+          complexity = 0.1 if "but" in content.lower() else 0
+
+          return min(1.0, count * 0.15 + complexity + 0.2)
+
+      def get_provider_id(self) -> str:
+          return "rms_engine"
+  ```
+
+acceptance_criteria:
+  - File at perception/rms/rms_engine.py
+  - RMSEngine implements IResonanceEncoder
+  - L1-L5 scoring implemented
+  - Uses QualiaEngine for L4
+
+depends_on: [P5-006]
+blocks: [P5-008]

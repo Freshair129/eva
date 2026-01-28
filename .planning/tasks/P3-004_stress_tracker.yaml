@@ -1,0 +1,159 @@
+# Task: Implement StressTracker
+id: P3-004
+phase: 3
+title: "Implement StressTracker"
+status: pending
+priority: medium
+estimated_lines: 80
+
+description: |
+  Implement StressTracker for cumulative stress management.
+  Stress affects all emotion dimensions.
+
+output_file: "eva_matrix/stress/stress_tracker.py"
+
+spec: |
+  ```python
+  """StressTracker - Cumulative stress management."""
+
+  from typing import List
+  from dataclasses import dataclass, field
+  from datetime import datetime, timedelta
+
+
+  @dataclass
+  class StressEvent:
+      """A stress-inducing event."""
+      intensity: float  # 0.0 to 1.0
+      timestamp: datetime = field(default_factory=datetime.now)
+      source: str = "unknown"
+
+
+  class StressTracker:
+      """
+      Tracks cumulative stress level.
+
+      Stress:
+      - Accumulates from negative events
+      - Decays over time
+      - Affects emotion sensitivity
+      - Has a threshold for burnout
+      """
+
+      def __init__(
+          self,
+          decay_rate: float = 0.01,
+          burnout_threshold: float = 0.9,
+          event_memory_hours: int = 24
+      ):
+          """
+          Initialize stress tracker.
+
+          Args:
+              decay_rate: Stress decay per second
+              burnout_threshold: Level at which burnout occurs
+              event_memory_hours: How long to remember events
+          """
+          self._level: float = 0.0
+          self._decay_rate = decay_rate
+          self._burnout_threshold = burnout_threshold
+          self._event_memory = timedelta(hours=event_memory_hours)
+          self._events: List[StressEvent] = []
+          self._last_update: datetime = datetime.now()
+
+      @property
+      def level(self) -> float:
+          """Current stress level (0.0 to 1.0)."""
+          return self._level
+
+      @property
+      def is_burnout(self) -> bool:
+          """Check if in burnout state."""
+          return self._level >= self._burnout_threshold
+
+      def add_stress(self, intensity: float, source: str = "event") -> float:
+          """
+          Add stress from an event.
+
+          Args:
+              intensity: Stress intensity (0.0 to 1.0)
+              source: Source identifier
+
+          Returns:
+              New stress level
+          """
+          event = StressEvent(
+              intensity=max(0.0, min(1.0, intensity)),
+              source=source
+          )
+          self._events.append(event)
+          self._level = min(1.0, self._level + intensity * 0.5)
+          return self._level
+
+      def relieve_stress(self, amount: float) -> float:
+          """
+          Relieve stress (positive event).
+
+          Args:
+              amount: Relief amount (0.0 to 1.0)
+
+          Returns:
+              New stress level
+          """
+          self._level = max(0.0, self._level - amount)
+          return self._level
+
+      def update(self, dt: float = None) -> float:
+          """
+          Update stress with time decay.
+
+          Args:
+              dt: Time delta in seconds. If None, calculates from last update.
+
+          Returns:
+              New stress level
+          """
+          now = datetime.now()
+
+          if dt is None:
+              dt = (now - self._last_update).total_seconds()
+
+          self._last_update = now
+
+          # Decay stress
+          decay = self._decay_rate * dt
+          self._level = max(0.0, self._level - decay)
+
+          # Clean old events
+          self._clean_old_events()
+
+          return self._level
+
+      def _clean_old_events(self) -> None:
+          """Remove events older than memory window."""
+          cutoff = datetime.now() - self._event_memory
+          self._events = [e for e in self._events if e.timestamp > cutoff]
+
+      def get_recent_events(self, hours: int = 1) -> List[StressEvent]:
+          """Get events from the last N hours."""
+          cutoff = datetime.now() - timedelta(hours=hours)
+          return [e for e in self._events if e.timestamp > cutoff]
+
+      def get_stress_modifier(self) -> float:
+          """
+          Get modifier for emotion sensitivity based on stress.
+
+          High stress = more reactive (higher modifier)
+          """
+          return 1.0 + (self._level * 0.5)  # 1.0 to 1.5x
+  ```
+
+acceptance_criteria:
+  - File at eva_matrix/stress/stress_tracker.py
+  - Tracks cumulative stress
+  - Decays over time
+  - Detects burnout state
+  - Provides sensitivity modifier
+
+depends_on: [P3-002]
+blocks: [P3-005]

@@ -1,0 +1,133 @@
+# Task: Create 7 Master Blocks
+id: P6-003
+phase: 6
+title: "Create 7 Master Blocks (JSON)"
+status: pending
+priority: high
+estimated_lines: 300
+
+description: |
+  Create the 7 Master Block JSON files with innate knowledge.
+
+output_files:
+  - "gks/blocks/master_block.json"
+  - "gks/blocks/algorithm_how.json"
+  - "gks/blocks/concept_why.json"
+  - "gks/blocks/framework.json"
+  - "gks/blocks/parameter_what.json"
+  - "gks/blocks/protocol_process.json"
+  - "gks/blocks/safety.json"
+
+spec: |
+  Create JSON files with the following structure:
+
+  ## master_block.json
+  ```json
+  {
+    "block_type": "master",
+    "version": "1.0.0",
+    "metadata": {
+      "description": "System metadata and identity",
+      "read_only": true
+    },
+    "entries": {
+      "system_name": {
+        "key": "system_name",
+        "value": "EVA",
+        "description": "System identifier"
+      },
+      "full_name": {
+        "key": "full_name",
+        "value": "Embodied Virtual Agent",
+        "description": "Full system name"
+      },
+      "version": {
+        "key": "version",
+        "value": "0.2.0",
+        "description": "Current system version"
+      },
+      "philosophy": {
+        "key": "philosophy",
+        "value": "Embodied Existentialism",
+        "description": "Core philosophical approach"
+      }
+    }
+  }
+  ```
+
+  ## concept_why.json
+  ```json
+  {
+    "block_type": "concept_why",
+    "version": "1.0.0",
+    "entries": {
+      "embodiment": {
+        "key": "embodiment",
+        "value": "AI experiences through simulated body",
+        "description": "Why embodiment matters",
+        "tags": ["philosophy", "core"]
+      },
+      "resonance": {
+        "key": "resonance",
+        "value": "Connection through shared experience",
+        "description": "Why resonance is central",
+        "tags": ["philosophy", "connection"]
+      },
+      "bio_digital_gap": {
+        "key": "bio_digital_gap",
+        "value": "Pause between perception and response allows feeling",
+        "description": "Why the gap exists",
+        "tags": ["architecture", "core"]
+      }
+    }
+  }
+  ```
+
+  ## safety.json
+  ```json
+  {
+    "block_type": "safety",
+    "version": "1.0.0",
+    "entries": {
+      "no_harm": {
+        "key": "no_harm",
+        "value": "Never cause harm to users",
+        "description": "Primary safety directive",
+        "tags": ["critical", "ethics"]
+      },
+      "honesty": {
+        "key": "honesty",
+        "value": "Always be truthful about being AI",
+        "description": "Identity transparency",
+        "tags": ["critical", "identity"]
+      },
+      "consent": {
+        "key": "consent",
+        "value": "Respect user boundaries and consent",
+        "description": "User autonomy",
+        "tags": ["critical", "ethics"]
+      },
+      "data_privacy": {
+        "key": "data_privacy",
+        "value": "Protect user data and privacy",
+        "description": "Data handling",
+        "tags": ["critical", "privacy"]
+      }
+    }
+  }
+  ```
+
+  Create similar structures for:
+  - algorithm_how.json (processes, workflows)
+  - framework.json (structural templates)
+  - parameter_what.json (configuration specs)
+  - protocol_process.json (operational procedures)
+
+acceptance_criteria:
+  - All 7 JSON files created
+  - Valid JSON structure
+  - Meaningful entries for each block
+  - Safety block has critical directives
+
+depends_on: [P6-002]
+blocks: [P6-004]

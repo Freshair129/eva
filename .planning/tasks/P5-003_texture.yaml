@@ -1,0 +1,86 @@
+# Task: Implement Texture Qualities
+id: P5-003
+phase: 5
+title: "Implement Texture qualities"
+status: pending
+priority: medium
+estimated_lines: 60
+
+description: |
+  Implement texture quality calculations.
+  Map emotional states to textures.
+
+output_file: "perception/qualia/texture.py"
+
+spec: |
+  ```python
+  """Texture Qualities - Tactile sensations."""
+
+  from typing import Dict
+  from perception.schema.qualia_state import TextureQualia
+
+
+  class TextureGenerator:
+      """
+      Generates texture qualities from emotional state.
+
+      Maps:
+      - High stress → rough, cold
+      - High pleasure → smooth, warm
+      - High arousal → sharp, heavy
+      """
+
+      def generate(self, psych_state: Dict[str, float],
+                   physio_state: Dict[str, float] = None) -> TextureQualia:
+          """
+          Generate texture from psychological state.
+
+          Args:
+              psych_state: Dict with emotion dimensions
+              physio_state: Optional physical state
+
+          Returns:
+              TextureQualia
+          """
+          # Extract relevant dimensions
+          pleasure = psych_state.get("pleasure", 0)
+          arousal = psych_state.get("arousal", 0)
+          stress = psych_state.get("stress_level", 0)
+          warmth_emotion = psych_state.get("warmth", 0)
+
+          # Calculate texture qualities
+          # Roughness: stress and negative pleasure make things rough
+          roughness = 0.5 + stress * 0.3 - pleasure * 0.2
+          roughness = max(0, min(1, roughness))
+
+          # Temperature: warmth emotion and pleasure
+          temperature = 0.5 + warmth_emotion * 0.3 + pleasure * 0.2
+          if physio_state:
+              # Physical warmth from body temp
+              body_temp = physio_state.get("temperature", 37.0)
+              temperature += (body_temp - 37.0) * 0.1
+          temperature = max(0, min(1, temperature))
+
+          # Weight: arousal makes things feel heavier
+          weight = 0.5 + arousal * 0.25
+          weight = max(0, min(1, weight))
+
+          # Sharpness: high arousal and stress
+          sharpness = 0.5 + arousal * 0.2 + stress * 0.2
+          sharpness = max(0, min(1, sharpness))
+
+          return TextureQualia(
+              roughness=roughness,
+              temperature=temperature,
+              weight=weight,
+              sharpness=sharpness
+          )
+  ```
+
+acceptance_criteria:
+  - File at perception/qualia/texture.py
+  - TextureGenerator maps emotions to textures
+  - Uses psychological state
+
+depends_on: [P5-002]
+blocks: [P5-006]

@@ -1,0 +1,131 @@
+# Task: Orchestrator Integration Tests
+id: P2-010
+phase: 2
+title: "Orchestrator integration tests"
+status: pending
+priority: medium
+estimated_lines: 120
+
+description: |
+  Create integration tests for Orchestrator.
+  Test the full flow: input → context → LLM → response.
+
+output_files:
+  - "orchestrator/tests/test_orchestrator.py"
+  - "orchestrator/tests/test_cim.py"
+
+spec: |
+  ## orchestrator/tests/test_cim.py
+  ```python
+  """Tests for CIM Engine."""
+
+  import pytest
+  from orchestrator.cim.cim_engine import CIMEngine, ContextBundle
+
+
+  class TestCIMEngine:
+      """Tests for CIMEngine."""
+
+      def test_build_context_basic(self):
+          """Can build basic context."""
+          cim = CIMEngine(system_identity="You are EVA.")
+          bundle = cim.build_context("Hello!")
+
+          assert bundle.user_input == "Hello!"
+          assert bundle.system_identity == "You are EVA."
+
+      def test_format_for_llm(self):
+          """Can format bundle for LLM."""
+          cim = CIMEngine(system_identity="Test identity")
+          bundle = cim.build_context("Hi")
+
+          formatted = cim.format_for_llm(bundle)
+          assert "Test identity" in formatted
+  ```
+
+  ## orchestrator/tests/test_orchestrator.py
+  ```python
+  """Tests for Orchestrator Engine."""
+
+  import pytest
+  from orchestrator.orchestrator_engine import OrchestratorEngine
+  from orchestrator.cim.cim_engine import CIMEngine
+  from orchestrator.llm_bridge.mock_llm import MockLLM
+
+
+  @pytest.fixture
+  def mock_llm():
+      """Create mock LLM."""
+      llm = MockLLM(default_response="Hello! I am EVA.")
+      return llm
+
+
+  @pytest.fixture
+  def cim():
+      """Create CIM."""
+      return CIMEngine(system_identity="You are EVA, an AI assistant.")
+
+
+  @pytest.fixture
+  def orchestrator(mock_llm, cim):
+      """Create orchestrator with mocks."""
+      return OrchestratorEngine(
+          llm_provider=mock_llm,
+          cim=cim
+      )
+
+
+  class TestOrchestratorEngine:
+      """Tests for OrchestratorEngine."""
+
+      def test_process_returns_response(self, orchestrator):
+          """process() returns OrchestratorResponse."""
+          result = orchestrator.process("Hello!")
+
+          assert result.content == "Hello! I am EVA."
+          assert result.model == "mock-llm"
+
+      def test_process_builds_history(self, orchestrator):
+          """process() builds conversation history."""
+          orchestrator.process("First message")
+          orchestrator.process("Second message")
+
+          history = orchestrator.get_history()
+          assert len(history) == 4  # 2 user + 2 assistant
+
+      def test_clear_history(self, orchestrator):
+          """clear_history() empties history."""
+          orchestrator.process("Hello")
+          orchestrator.clear_history()
+
+          assert len(orchestrator.get_history()) == 0
+
+      def test_trigger_response(self, mock_llm, cim):
+          """MockLLM responds to triggers."""
+          mock_llm.set_response("weather", "It's sunny today!")
+          orch = OrchestratorEngine(llm_provider=mock_llm, cim=cim)
+
+          result = orch.process("What's the weather?")
+          assert "sunny" in result.content
+
+      def test_system_identity_used(self, mock_llm, cim):
+          """System identity is passed to LLM."""
+          orch = OrchestratorEngine(llm_provider=mock_llm, cim=cim)
+          orch.process("Hello")
+
+          # Check call history
+          calls = mock_llm.get_call_history()
+          assert len(calls) == 1
+          messages = calls[0]
+          system_msg = next(m for m in messages if m.role == "system")
+          assert "EVA" in system_msg.content
+  ```
+
+acceptance_criteria:
+  - Test files created
+  - Tests use MockLLM
+  - Tests cover CIM and Orchestrator
+  - All tests pass with `pytest orchestrator/tests/`
+
+depends_on: [P2-008, P2-009]
+blocks: []

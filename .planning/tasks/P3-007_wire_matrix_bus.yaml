@@ -1,0 +1,100 @@
+# Task: Wire Matrix to Bus
+id: P3-007
+phase: 3
+title: "Wire Matrix ↔ Bus"
+status: pending
+priority: high
+estimated_lines: 40
+
+description: |
+  Create bus integration for EVA Matrix.
+  Matrix publishes state changes to bus:psychological.
+
+output_file: "eva_matrix/bus_integration.py"
+
+spec: |
+  ```python
+  """Bus Integration for EVA Matrix."""
+
+  from typing import Callable
+  from contracts.ports.i_bus import IBus
+  from eva_matrix.matrix_engine import MatrixEngine
+
+
+  CHANNEL_PSYCHOLOGICAL = "bus:psychological"
+
+
+  def wire_matrix_to_bus(engine: MatrixEngine, bus: IBus) -> None:
+      """
+      Wire Matrix engine to publish on bus.
+
+      Args:
+          engine: MatrixEngine instance
+          bus: IBus implementation
+      """
+      # Engine already accepts bus in constructor
+      # This is for explicit wiring after construction
+
+      original_process = engine.process_stimulus
+
+      def process_with_publish(stimulus):
+          result = original_process(stimulus)
+          bus.publish(CHANNEL_PSYCHOLOGICAL, result.to_dict())
+          return result
+
+      engine.process_stimulus = process_with_publish
+
+
+  def create_matrix_with_bus(bus: IBus) -> MatrixEngine:
+      """
+      Factory to create Matrix with bus already wired.
+
+      Args:
+          bus: IBus implementation
+
+      Returns:
+          MatrixEngine connected to bus
+      """
+      return MatrixEngine(bus=bus)
+
+
+  def subscribe_to_physical(bus: IBus, engine: MatrixEngine) -> None:
+      """
+      Subscribe Matrix to physical state changes.
+
+      Physical state (hormones) affects psychological state.
+
+      Args:
+          bus: IBus implementation
+          engine: MatrixEngine to affect
+      """
+      def on_physical_state(data):
+          # Physical affects psychological
+          # High cortisol → negative pleasure, high arousal
+          if "cortisol" in data:
+              cortisol = data["cortisol"]
+              if cortisol > 0.5:
+                  engine.process_stimulus({
+                      "pleasure": -(cortisol - 0.5),
+                      "arousal": (cortisol - 0.5) * 0.5
+                  })
+
+          # High dopamine → positive pleasure
+          if "dopamine" in data:
+              dopamine = data["dopamine"]
+              if dopamine > 0.5:
+                  engine.process_stimulus({
+                      "pleasure": (dopamine - 0.5) * 0.8
+                  })
+
+      bus.subscribe("bus:physical", on_physical_state)
+  ```
+
+acceptance_criteria:
+  - File at eva_matrix/bus_integration.py
+  - wire_matrix_to_bus() connects engine
+  - Factory creates pre-wired engine
+  - Can subscribe to physical state
+
+depends_on: [P3-006]
+blocks: [P3-008]

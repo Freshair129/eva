@@ -1,0 +1,160 @@
+# Task: Implement Receptor System
+id: P4-008
+phase: 4
+title: "Implement Receptor system"
+status: pending
+priority: medium
+estimated_lines: 100
+
+description: |
+  Implement receptor system for signal transduction.
+  Receptors can sensitize or desensitize based on exposure.
+
+output_file: "physio_core/receptor/receptor_system.py"
+
+spec: |
+  ```python
+  """Receptor System - Signal transduction."""
+
+  from typing import Dict
+  from dataclasses import dataclass
+
+
+  @dataclass
+  class ReceptorState:
+      """State of a single receptor type."""
+      hormone: str
+      sensitivity: float  # 0.5-2.0 (1.0 = normal)
+      last_exposure: float  # Last hormone level seen
+
+
+  class Receptor:
+      """
+      A receptor for a specific hormone.
+
+      Sensitivity adapts based on exposure:
+      - High chronic exposure → desensitization
+      - Low chronic exposure → sensitization
+      """
+
+      def __init__(self, hormone: str):
+          self._hormone = hormone
+          self._sensitivity = 1.0
+          self._exposure_avg = 0.5  # Running average
+
+      @property
+      def sensitivity(self) -> float:
+          return self._sensitivity
+
+      def process_signal(self, hormone_level: float) -> float:
+          """
+          Process incoming hormone signal.
+
+          Args:
+              hormone_level: Current hormone level (0-1)
+
+          Returns:
+              Effective signal strength (adjusted by sensitivity)
+          """
+          # Update exposure average (exponential moving average)
+          alpha = 0.1
+          self._exposure_avg = alpha * hormone_level + (1 - alpha) * self._exposure_avg
+
+          # Calculate effective signal
+          effective = hormone_level * self._sensitivity
+
+          # Adapt sensitivity
+          self._adapt_sensitivity(hormone_level)
+
+          return effective
+
+      def _adapt_sensitivity(self, current_level: float) -> None:
+          """
+          Adapt sensitivity based on exposure.
+
+          High exposure → desensitize (sensitivity drops)
+          Low exposure → sensitize (sensitivity rises)
+          """
+          # Compare to average
+          if current_level > self._exposure_avg + 0.1:
+              # High exposure, desensitize
+              self._sensitivity = max(0.5, self._sensitivity - 0.01)
+          elif current_level < self._exposure_avg - 0.1:
+              # Low exposure, sensitize
+              self._sensitivity = min(2.0, self._sensitivity + 0.01)
+          else:
+              # Normal, drift towards 1.0
+              self._sensitivity += (1.0 - self._sensitivity) * 0.005
+
+      def get_state(self) -> ReceptorState:
+          """Get receptor state."""
+          return ReceptorState(
+              hormone=self._hormone,
+              sensitivity=self._sensitivity,
+              last_exposure=self._exposure_avg
+          )
+
+      def reset(self) -> None:
+          """Reset to default state."""
+          self._sensitivity = 1.0
+          self._exposure_avg = 0.5
+
+
+  class ReceptorSystem:
+      """
+      Complete receptor system for all hormones.
+      """
+
+      def __init__(self):
+          """Initialize receptors for all hormones."""
+          self._receptors: Dict[str, Receptor] = {}
+          hormones = [
+              "dopamine", "serotonin", "oxytocin", "cortisol",
+              "adrenaline", "noradrenaline", "gaba", "acetylcholine",
+              "endorphin", "testosterone", "estrogen", "melatonin"
+          ]
+          for h in hormones:
+              self._receptors[h] = Receptor(h)
+
+      def process_hormones(self, levels: Dict[str, float]) -> Dict[str, float]:
+          """
+          Process all hormone signals through receptors.
+
+          Args:
+              levels: Dict of hormone name to level
+
+          Returns:
+              Effective levels after receptor processing
+          """
+          effective = {}
+          for hormone, level in levels.items():
+              if hormone in self._receptors:
+                  effective[hormone] = self._receptors[hormone].process_signal(level)
+              else:
+                  effective[hormone] = level
+          return effective
+
+      def get_sensitivity(self, hormone: str) -> float:
+          """Get sensitivity for a hormone."""
+          if hormone in self._receptors:
+              return self._receptors[hormone].sensitivity
+          return 1.0
+
+      def get_all_sensitivities(self) -> Dict[str, float]:
+          """Get all receptor sensitivities."""
+          return {h: r.sensitivity for h, r in self._receptors.items()}
+
+      def reset_all(self) -> None:
+          """Reset all receptors."""
+          for r in self._receptors.values():
+              r.reset()
+  ```
+
+acceptance_criteria:
+  - File at physio_core/receptor/receptor_system.py
+  - Receptor with sensitivity adaptation
+  - ReceptorSystem for all 12 hormones
+  - High exposure → desensitization
+
+depends_on: [P4-007]
+blocks: [P4-009]

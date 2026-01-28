@@ -1,0 +1,177 @@
+# Task: Create GKS Engine
+id: P6-005
+phase: 6
+title: "Create GKS Engine"
+status: pending
+priority: high
+estimated_lines: 120
+
+description: |
+  Create the main GKS Engine.
+  Provides access to innate knowledge.
+
+output_file: "gks/gks_engine.py"
+
+spec: |
+  ```python
+  """GKS Engine - Genesis Knowledge System."""
+
+  from typing import Dict, Any, List, Optional
+  from gks.schema.block_schema import KnowledgeBlock, BlockType, KnowledgeEntry
+  from gks.loader.block_loader import BlockLoader
+
+
+  class GKSEngine:
+      """
+      Genesis Knowledge System Engine.
+
+      Provides access to innate, read-only knowledge.
+      Knowledge is organized into 7 Master Blocks.
+      """
+
+      def __init__(self, loader: BlockLoader = None):
+          """
+          Initialize GKS.
+
+          Args:
+              loader: BlockLoader instance (creates default if None)
+          """
+          self._loader = loader or BlockLoader()
+          self._blocks: Dict[BlockType, KnowledgeBlock] = {}
+          self._load_all()
+
+      def _load_all(self) -> None:
+          """Load all blocks on init."""
+          self._blocks = self._loader.load_all()
+
+      def get_block(self, block_type: BlockType) -> Optional[KnowledgeBlock]:
+          """
+          Get a specific block.
+
+          Args:
+              block_type: Type of block
+
+          Returns:
+              KnowledgeBlock or None
+          """
+          return self._blocks.get(block_type)
+
+      def get(self, block_type: BlockType, key: str) -> Any:
+          """
+          Get a value from a block.
+
+          Args:
+              block_type: Type of block
+              key: Entry key
+
+          Returns:
+              Value or None
+          """
+          block = self._blocks.get(block_type)
+          if block:
+              return block.get(key)
+          return None
+
+      def search(self, query: str, block_types: List[BlockType] = None) -> List[KnowledgeEntry]:
+          """
+          Search across blocks.
+
+          Args:
+              query: Search query
+              block_types: Blocks to search (all if None)
+
+          Returns:
+              Matching entries
+          """
+          results = []
+          blocks_to_search = block_types or list(BlockType)
+
+          for block_type in blocks_to_search:
+              block = self._blocks.get(block_type)
+              if block:
+                  results.extend(block.search(query))
+
+          return results
+
+      def get_safety_directives(self) -> List[KnowledgeEntry]:
+          """
+          Get all safety directives.
+
+          These are critical and should always be respected.
+
+          Returns:
+              List of safety entries
+          """
+          safety_block = self._blocks.get(BlockType.SAFETY)
+          if safety_block:
+              return list(safety_block.entries.values())
+          return []
+
+      def get_system_identity(self) -> Dict[str, Any]:
+          """
+          Get system identity information.
+
+          Returns:
+              Dict with system name, version, philosophy
+          """
+          master = self._blocks.get(BlockType.MASTER)
+          if not master:
+              return {}
+
+          return {
+              "name": master.get("system_name"),
+              "full_name": master.get("full_name"),
+              "version": master.get("version"),
+              "philosophy": master.get("philosophy")
+          }
+
+      def format_for_context(self, block_type: BlockType) -> str:
+          """
+          Format block for LLM context injection.
+
+          Args:
+              block_type: Block to format
+
+          Returns:
+              Formatted string
+          """
+          block = self._blocks.get(block_type)
+          if not block:
+              return ""
+
+          lines = [f"# {block_type.value.replace('_', ' ').title()}"]
+          for key, entry in block.entries.items():
+              lines.append(f"- **{key}**: {entry.value}")
+              if entry.description:
+                  lines.append(f"  _{entry.description}_")
+
+          return "\n".join(lines)
+
+      def get_all_for_context(self) -> str:
+          """
+          Format all blocks for context injection.
+
+          Returns:
+              Complete formatted knowledge
+          """
+          parts = []
+          for block_type in BlockType:
+              formatted = self.format_for_context(block_type)
+              if formatted:
+                  parts.append(formatted)
+          return "\n\n".join(parts)
+
+      def reload(self) -> None:
+          """Reload all blocks from disk."""
+          self._loader.clear_cache()
+          self._load_all()
+  ```
+
+acceptance_criteria:
+  - File at gks/gks_engine.py
+  - Loads and provides access to all blocks
+  - get_safety_directives() for critical rules
+  - format_for_context() for LLM injection
+
+depends_on: [P6-004]
+blocks: [P6-006]

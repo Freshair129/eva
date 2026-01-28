@@ -1,0 +1,114 @@
+# Task: Define EpisodicMemory Schema
+id: P1-002
+phase: 1
+title: "Define EpisodicMemory schema"
+status: done
+priority: high
+estimated_lines: 60
+
+# Description
+description: |
+  Define the EpisodicMemory dataclass for autobiographical memories.
+  These are memories of conversations, events, and experiences.
+
+  Each episodic memory has:
+  - Unique ID
+  - Timestamp
+  - Content (what happened)
+  - Participants (who was involved)
+  - Emotional context (how it felt)
+  - Importance score (0.0-1.0)
+
+# Output
+output_file: "msp/schema/episodic.py"
+
+# Specification
+spec: |
+  ```python
+  """Episodic Memory Schema - Autobiographical memories."""
+
+  from dataclasses import dataclass, field
+  from datetime import datetime
+  from typing import Optional, List, Dict, Any
+  from uuid import uuid4
+
+
+  @dataclass
+  class EpisodicMemory:
+      """
+      Represents an autobiographical memory.
+
+      Episodic memories are "what happened" memories:
+      - Conversations with users
+      - Events and experiences
+      - Contextual situations
+
+      Attributes:
+          id: Unique identifier
+          timestamp: When the memory was formed
+          content: Main content of the memory
+          summary: Brief summary for quick recall
+          participants: List of participant IDs
+          emotional_context: Dict of emotion dimensions at time of memory
+          location_context: Optional location information
+          importance: Importance score (0.0-1.0)
+          tags: List of categorization tags
+          linked_memories: IDs of related memories
+      """
+
+      content: str
+      summary: str
+
+      id: str = field(default_factory=lambda: f"ep_{uuid4().hex[:8]}")
+      timestamp: datetime = field(default_factory=datetime.now)
+      participants: List[str] = field(default_factory=list)
+      emotional_context: Dict[str, float] = field(default_factory=dict)
+      location_context: Optional[str] = None
+      importance: float = 0.5
+      tags: List[str] = field(default_factory=list)
+      linked_memories: List[str] = field(default_factory=list)
+
+      def to_dict(self) -> Dict[str, Any]:
+          """Convert to dictionary for storage."""
+          return {
+              "id": self.id,
+              "timestamp": self.timestamp.isoformat(),
+              "content": self.content,
+              "summary": self.summary,
+              "participants": self.participants,
+              "emotional_context": self.emotional_context,
+              "location_context": self.location_context,
+              "importance": self.importance,
+              "tags": self.tags,
+              "linked_memories": self.linked_memories,
+              "type": "episodic"
+          }
+
+      @classmethod
+      def from_dict(cls, data: Dict[str, Any]) -> "EpisodicMemory":
+          """Create from dictionary."""
+          return cls(
+              id=data["id"],
+              timestamp=datetime.fromisoformat(data["timestamp"]),
+              content=data["content"],
+              summary=data["summary"],
+              participants=data.get("participants", []),
+              emotional_context=data.get("emotional_context", {}),
+              location_context=data.get("location_context"),
+              importance=data.get("importance", 0.5),
+              tags=data.get("tags", []),
+              linked_memories=data.get("linked_memories", [])
+          )
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at msp/schema/episodic.py
+  - EpisodicMemory dataclass defined
+  - All fields have type hints
+  - to_dict() and from_dict() methods work
+  - Docstrings explain purpose
+
+# Dependencies
+depends_on: [P1-001]
+blocks: [P1-005]

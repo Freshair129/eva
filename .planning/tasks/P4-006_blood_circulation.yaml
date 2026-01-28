@@ -1,0 +1,137 @@
+# Task: Implement Blood Circulation
+id: P4-006
+phase: 4
+title: "Implement Blood circulation"
+status: pending
+priority: medium
+estimated_lines: 100
+
+description: |
+  Implement blood circulation system.
+  Distributes hormones through the body at 30Hz.
+
+output_file: "physio_core/blood/circulation.py"
+
+spec: |
+  ```python
+  """Blood Circulation - Hormone distribution."""
+
+  from typing import Dict, Callable
+  from dataclasses import dataclass
+  from datetime import datetime
+  import threading
+  import time
+
+
+  @dataclass
+  class BloodSample:
+      """A snapshot of blood hormone levels."""
+      hormones: Dict[str, float]
+      timestamp: datetime
+
+
+  class CirculationSystem:
+      """
+      Blood circulation system.
+
+      Distributes hormones at configurable rate (default 30Hz).
+      Can run in background thread for continuous simulation.
+      """
+
+      def __init__(self, update_hz: float = 30.0):
+          """
+          Initialize circulation.
+
+          Args:
+              update_hz: Update frequency in Hz
+          """
+          self._update_hz = update_hz
+          self._update_interval = 1.0 / update_hz
+          self._hormone_levels: Dict[str, float] = {}
+          self._running = False
+          self._thread = None
+          self._callbacks: list = []
+
+      def set_levels(self, levels: Dict[str, float]) -> None:
+          """
+          Set current hormone levels in blood.
+
+          Args:
+              levels: Dict of hormone name to level
+          """
+          self._hormone_levels = levels.copy()
+
+      def get_levels(self) -> Dict[str, float]:
+          """Get current blood hormone levels."""
+          return self._hormone_levels.copy()
+
+      def get_sample(self) -> BloodSample:
+          """Get a blood sample (snapshot)."""
+          return BloodSample(
+              hormones=self._hormone_levels.copy(),
+              timestamp=datetime.now()
+          )
+
+      def add_callback(self, callback: Callable[[Dict[str, float]], None]) -> None:
+          """
+          Add callback for circulation updates.
+
+          Args:
+              callback: Function called with hormone levels each tick
+          """
+          self._callbacks.append(callback)
+
+      def start(self) -> None:
+          """Start circulation in background thread."""
+          if self._running:
+              return
+
+          self._running = True
+          self._thread = threading.Thread(target=self._run_loop, daemon=True)
+          self._thread.start()
+
+      def stop(self) -> None:
+          """Stop circulation."""
+          self._running = False
+          if self._thread:
+              self._thread.join(timeout=1.0)
+
+      def _run_loop(self) -> None:
+          """Internal loop running at update_hz."""
+          while self._running:
+              # Notify callbacks
+              for cb in self._callbacks:
+                  try:
+                      cb(self._hormone_levels)
+                  except Exception:
+                      pass  # Don't let callbacks crash loop
+
+              time.sleep(self._update_interval)
+
+      def tick(self) -> None:
+          """
+          Manual tick for non-threaded usage.
+
+          Call this in your own loop if not using start().
+          """
+          for cb in self._callbacks:
+              try:
+                  cb(self._hormone_levels)
+              except Exception:
+                  pass
+
+      @property
+      def is_running(self) -> bool:
+          """Check if circulation is running."""
+          return self._running
+  ```
+
+acceptance_criteria:
+  - File at physio_core/blood/circulation.py
+  - CirculationSystem distributes hormones
+  - Supports 30Hz update rate
+  - Can run in background thread
+  - Callbacks for updates
+
+depends_on: [P4-005]
+blocks: [P4-007, P4-009]

@@ -1,0 +1,155 @@
+# Task: Create Qualia Engine
+id: P5-006
+phase: 5
+title: "Create Qualia Engine"
+status: pending
+priority: high
+estimated_lines: 120
+
+description: |
+  Create the main Qualia Engine.
+  Coordinates all phenomenological generators.
+
+output_file: "perception/qualia/qualia_engine.py"
+
+spec: |
+  ```python
+  """Qualia Engine - Phenomenological experience generator."""
+
+  from typing import Dict, Any, Optional
+
+  from perception.schema.qualia_state import QualiaState
+  from perception.qualia.texture import TextureGenerator
+  from perception.qualia.color import ColorGenerator
+  from perception.qualia.soundscape import SoundscapeGenerator
+
+
+  class QualiaEngine:
+      """
+      Qualia Engine - Generates subjective experience.
+
+      Combines texture, color, and soundscape
+      based on psychological and physical state.
+      """
+
+      def __init__(self, bus=None):
+          """
+          Initialize Qualia Engine.
+
+          Args:
+              bus: Optional bus for publishing state
+          """
+          self._texture_gen = TextureGenerator()
+          self._color_gen = ColorGenerator()
+          self._soundscape_gen = SoundscapeGenerator()
+          self._bus = bus
+          self._current_state: Optional[QualiaState] = None
+
+      def generate(self,
+                   psych_state: Dict[str, float],
+                   physio_state: Dict[str, float] = None) -> QualiaState:
+          """
+          Generate complete qualia from state.
+
+          Args:
+              psych_state: Psychological state dict
+              physio_state: Optional physical state dict
+
+          Returns:
+              Complete QualiaState
+          """
+          texture = self._texture_gen.generate(psych_state, physio_state)
+          color = self._color_gen.generate(psych_state)
+          soundscape = self._soundscape_gen.generate(psych_state, physio_state)
+
+          # Calculate overall intensity
+          arousal = psych_state.get("arousal", 0)
+          stress = psych_state.get("stress_level", 0)
+          intensity = 0.5 + abs(arousal) * 0.3 + stress * 0.2
+          intensity = max(0, min(1, intensity))
+
+          state = QualiaState(
+              texture=texture,
+              color=color,
+              soundscape=soundscape,
+              intensity=intensity
+          )
+
+          self._current_state = state
+          self._publish_state(state)
+
+          return state
+
+      def get_current_state(self) -> Optional[QualiaState]:
+          """Get last generated state."""
+          return self._current_state
+
+      def _publish_state(self, state: QualiaState) -> None:
+          """Publish to bus."""
+          if self._bus:
+              self._bus.publish("bus:phenomenological", state.to_dict())
+
+      def describe_experience(self, state: QualiaState = None) -> str:
+          """
+          Generate natural language description of qualia.
+
+          Args:
+              state: State to describe (uses current if None)
+
+          Returns:
+              Human-readable description
+          """
+          state = state or self._current_state
+          if not state:
+              return "No experience to describe."
+
+          parts = []
+
+          # Texture description
+          tex = state.texture
+          if tex.temperature > 0.6:
+              parts.append("warm")
+          elif tex.temperature < 0.4:
+              parts.append("cool")
+
+          if tex.roughness > 0.6:
+              parts.append("rough")
+          elif tex.roughness < 0.4:
+              parts.append("smooth")
+
+          # Color description
+          col = state.color
+          if col.brightness > 0.6:
+              parts.append("bright")
+          elif col.brightness < 0.4:
+              parts.append("dim")
+
+          if col.saturation > 0.6:
+              parts.append("vivid")
+
+          # Soundscape description
+          snd = state.soundscape
+          if snd.harmony > 0.6:
+              parts.append("harmonious")
+          elif snd.harmony < 0.4:
+              parts.append("discordant")
+
+          if snd.rhythm > 0.6:
+              parts.append("energetic")
+          elif snd.rhythm < 0.4:
+              parts.append("slow")
+
+          if not parts:
+              return "neutral experience"
+
+          return f"A {', '.join(parts)} experience"
+  ```
+
+acceptance_criteria:
+  - File at perception/qualia/qualia_engine.py
+  - Coordinates all generators
+  - generate() returns QualiaState
+  - describe_experience() for natural language
+
+depends_on: [P5-003, P5-004, P5-005]
+blocks: [P5-007]

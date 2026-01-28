@@ -1,0 +1,70 @@
+# Task: Wire Qualia to Bus
+id: P5-008
+phase: 5
+title: "Wire Qualia ↔ Bus"
+status: pending
+priority: high
+estimated_lines: 40
+
+description: |
+  Create bus integration for Perception system.
+
+output_file: "perception/integration.py"
+
+spec: |
+  ```python
+  """Perception Integration - Bus wiring."""
+
+  from contracts.ports.i_bus import IBus
+  from perception.qualia.qualia_engine import QualiaEngine
+  from perception.rms.rms_engine import RMSEngine
+
+
+  def create_perception_system(bus: IBus) -> tuple:
+      """
+      Factory to create perception system wired to bus.
+
+      Args:
+          bus: IBus implementation
+
+      Returns:
+          Tuple of (QualiaEngine, RMSEngine)
+      """
+      qualia = QualiaEngine(bus=bus)
+      rms = RMSEngine(qualia_engine=qualia)
+      return qualia, rms
+
+
+  def wire_perception_to_states(
+      qualia_engine: QualiaEngine,
+      bus: IBus
+  ) -> None:
+      """
+      Wire perception to listen to state changes.
+
+      Auto-generates qualia when psych/physio state changes.
+      """
+      psych_state = {}
+      physio_state = {}
+
+      def on_psych_change(data):
+          nonlocal psych_state
+          psych_state = data
+          qualia_engine.generate(psych_state, physio_state)
+
+      def on_physio_change(data):
+          nonlocal physio_state
+          physio_state = data.get("hormones", data)
+          # Don't auto-generate on physio alone
+
+      bus.subscribe("bus:psychological", on_psych_change)
+      bus.subscribe("bus:physical", on_physio_change)
+  ```
+
+acceptance_criteria:
+  - File at perception/integration.py
+  - Factory creates wired perception
+  - Auto-generates qualia on state change
+
+depends_on: [P5-007]
+blocks: []

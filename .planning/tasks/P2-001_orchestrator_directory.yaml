@@ -1,0 +1,47 @@
+# Task: Create Orchestrator Directory
+id: P2-001
+phase: 2
+title: "Create Orchestrator directory structure"
+status: pending
+priority: high
+estimated_lines: 10
+
+description: |
+  Create the Orchestrator (CNS - Central Nervous System) directory structure.
+  This is the brain that routes messages and coordinates all systems.
+
+output_files:
+  - "orchestrator/__init__.py"
+  - "orchestrator/cim/__init__.py"
+  - "orchestrator/llm_bridge/__init__.py"
+  - "orchestrator/tests/__init__.py"
+
+spec: |
+  ```
+  orchestrator/
+  ├── __init__.py
+  ├── cim/
+  │   └── __init__.py
+  ├── llm_bridge/
+  │   └── __init__.py
+  └── tests/
+      └── __init__.py
+  ```
+
+  ## orchestrator/__init__.py
+  ```python
+  """
+  Orchestrator - Central Nervous System (CNS)
+
+  Routes messages, coordinates systems, manages cognitive flow.
+  """
+  __version__ = "0.1.0"
+  ```
+
+acceptance_criteria:
+  - orchestrator/ directory exists
+  - All subdirectories with __init__.py
+  - Package is importable
+
+depends_on: []
+blocks: [P2-002, P2-005]

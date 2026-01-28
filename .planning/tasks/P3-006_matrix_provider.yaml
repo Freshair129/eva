@@ -1,0 +1,100 @@
+# Task: Implement MatrixProvider
+id: P3-006
+phase: 3
+title: "Implement MatrixProvider (IStateProvider)"
+status: pending
+priority: high
+estimated_lines: 60
+
+description: |
+  Create MatrixProvider that implements IStateProvider.
+  This is the adapter for Matrix to plug into the system.
+
+output_file: "eva_matrix/matrix_provider.py"
+
+spec: |
+  ```python
+  """MatrixProvider - IStateProvider implementation for EVA Matrix."""
+
+  from typing import Dict, Any
+  from datetime import datetime
+
+  from contracts.ports.i_state_provider import IStateProvider
+  from eva_matrix.matrix_engine import MatrixEngine
+
+
+  class MatrixProvider(IStateProvider):
+      """
+      Adapter that exposes MatrixEngine as IStateProvider.
+
+      Allows Matrix to integrate with the standard
+      state provider interface.
+      """
+
+      def __init__(self, engine: MatrixEngine = None):
+          """
+          Initialize provider.
+
+          Args:
+              engine: MatrixEngine instance. Creates new if None.
+          """
+          self._engine = engine or MatrixEngine()
+
+      @property
+      def engine(self) -> MatrixEngine:
+          """Access underlying engine."""
+          return self._engine
+
+      def get_current_state(self) -> Dict[str, Any]:
+          """
+          Get current psychological state snapshot.
+
+          Returns:
+              Dict containing:
+              - timestamp
+              - state: 9D emotion values
+              - stress_level
+              - dominant_emotion
+              - source
+          """
+          state = self._engine.get_state()
+
+          return {
+              "timestamp": datetime.now().isoformat(),
+              "state": state.to_dict(),
+              "stress_level": state.stress_level,
+              "dominant_emotion": state.get_dominant_emotion(),
+              "is_stressed": self._engine.is_stressed(),
+              "is_burnout": self._engine.is_burnout(),
+              "source": self.get_provider_id()
+          }
+
+      def get_state_type(self) -> str:
+          """Returns 'psychological'."""
+          return "psychological"
+
+      def get_provider_id(self) -> str:
+          """Returns 'eva_matrix'."""
+          return "eva_matrix"
+
+      # Convenience methods that delegate to engine
+
+      def apply_emotion(self, emotion: str, intensity: float = 0.5) -> Dict[str, Any]:
+          """Apply named emotion and return new state."""
+          self._engine.apply_emotion(emotion, intensity)
+          return self.get_current_state()
+
+      def process_stimulus(self, stimulus: Dict[str, float]) -> Dict[str, Any]:
+          """Process raw stimulus and return new state."""
+          self._engine.process_stimulus(stimulus)
+          return self.get_current_state()
+  ```
+
+acceptance_criteria:
+  - File at eva_matrix/matrix_provider.py
+  - MatrixProvider implements IStateProvider
+  - get_current_state() returns full snapshot
+  - Wraps MatrixEngine
+
+depends_on: [P3-005]
+blocks: [P3-007]

@@ -1,0 +1,129 @@
+# Task: Setup Pytest Structure
+id: P0-010
+phase: 0
+title: "Setup pytest testing framework"
+status: done
+priority: medium
+estimated_lines: 50
+
+# Description
+description: |
+  Setup pytest testing infrastructure:
+  - Create tests/ directory structure
+  - Create conftest.py with fixtures
+  - Create sample tests for Phase 0 components
+
+# Output Files
+output_files:
+  - "tests/__init__.py"
+  - "tests/conftest.py"
+  - "tests/unit/__init__.py"
+  - "tests/unit/test_simple_bus.py"
+  - "tests/integration/__init__.py"
+  - "pytest.ini"
+
+# Specification
+spec: |
+  ## pytest.ini
+  ```ini
+  [pytest]
+  testpaths = tests
+  python_files = test_*.py
+  python_classes = Test*
+  python_functions = test_*
+  addopts = -v --tb=short
+  ```
+
+  ## tests/conftest.py
+  ```python
+  import pytest
+  import sys
+  from pathlib import Path
+
+  # Add project root to path
+  sys.path.insert(0, str(Path(__file__).parent.parent))
+
+  from adapters.simple_bus import SimpleBus
+  from adapters.mocks.mock_state_providers import (
+      MockPhysioProvider,
+      MockMatrixProvider,
+  )
+  from adapters.mocks.mock_resonance_encoder import MockResonanceEncoder
+
+
+  @pytest.fixture
+  def simple_bus():
+      """Provides a fresh SimpleBus instance."""
+      bus = SimpleBus()
+      yield bus
+      bus.clear()
+
+
+  @pytest.fixture
+  def mock_physio():
+      """Provides MockPhysioProvider."""
+      return MockPhysioProvider()
+
+
+  @pytest.fixture
+  def mock_matrix():
+      """Provides MockMatrixProvider."""
+      return MockMatrixProvider()
+
+
+  @pytest.fixture
+  def mock_encoder():
+      """Provides MockResonanceEncoder."""
+      return MockResonanceEncoder()
+  ```
+
+  ## tests/unit/test_simple_bus.py
+  ```python
+  import pytest
+
+
+  class TestSimpleBus:
+      """Tests for SimpleBus implementation."""
+
+      def test_publish_stores_latest(self, simple_bus):
+          """Published message should be stored as latest."""
+          simple_bus.publish("test:channel", {"data": "hello"})
+          latest = simple_bus.get_latest("test:channel")
+          assert latest["data"] == "hello"
+
+      def test_subscribe_receives_messages(self, simple_bus):
+          """Subscribers should receive published messages."""
+          received = []
+          simple_bus.subscribe("test:channel", lambda msg: received.append(msg))
+          simple_bus.publish("test:channel", {"data": "world"})
+          assert len(received) == 1
+          assert received[0]["data"] == "world"
+
+      def test_unsubscribe_stops_messages(self, simple_bus):
+          """Unsubscribed callbacks should not receive messages."""
+          received = []
+          sub_id = simple_bus.subscribe("test:channel", lambda msg: received.append(msg))
+          simple_bus.unsubscribe(sub_id)
+          simple_bus.publish("test:channel", {"data": "ignored"})
+          assert len(received) == 0
+
+      def test_list_channels(self, simple_bus):
+          """list_channels should return all known channels."""
+          simple_bus.publish("channel:a", {})
+          simple_bus.publish("channel:b", {})
+          channels = simple_bus.list_channels()
+          assert "channel:a" in channels
+          assert "channel:b" in channels
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - pytest.ini exists at project root
+  - tests/conftest.py has fixtures for all mocks
+  - tests/unit/test_simple_bus.py has passing tests
+  - Running `pytest` from root works
+  - All __init__.py files created
+
+# Dependencies
+depends_on: [P0-008, P0-006, P0-007]  # Needs implementations to test
+blocks: []

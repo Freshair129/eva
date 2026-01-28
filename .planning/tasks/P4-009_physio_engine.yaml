@@ -1,0 +1,200 @@
+# Task: Create Physio Engine
+id: P4-009
+phase: 4
+title: "Create Physio Engine"
+status: pending
+priority: high
+estimated_lines: 180
+
+description: |
+  Create the main PhysioCore engine.
+  Coordinates all biological subsystems.
+
+output_file: "physio_core/physio_engine.py"
+
+spec: |
+  ```python
+  """PhysioCore Engine - Main biological engine."""
+
+  from typing import Dict, Any, Optional
+  from datetime import datetime
+
+  from physio_core.schema.physio_state import PhysioState
+  from physio_core.endocrine.glands import EndocrineSystem
+  from physio_core.endocrine.cascade import CascadeManager
+  from physio_core.blood.circulation import CirculationSystem
+  from physio_core.vitals.vital_signs import VitalsTracker
+  from physio_core.receptor.receptor_system import ReceptorSystem
+
+
+  class PhysioEngine:
+      """
+      PhysioCore - Biological Simulation Engine.
+
+      Coordinates:
+      - Endocrine system (12 hormones)
+      - Cascade responses
+      - Blood circulation
+      - Vital signs
+      - Receptor adaptation
+      """
+
+      def __init__(self, bus=None, enable_circulation: bool = False):
+          """
+          Initialize PhysioCore.
+
+          Args:
+              bus: Optional bus for publishing state
+              enable_circulation: Start 30Hz circulation thread
+          """
+          self._endocrine = EndocrineSystem()
+          self._cascade = CascadeManager(self._endocrine)
+          self._circulation = CirculationSystem()
+          self._vitals = VitalsTracker()
+          self._receptors = ReceptorSystem()
+          self._bus = bus
+
+          # Wire circulation to update vitals
+          self._circulation.add_callback(self._on_circulation_tick)
+
+          if enable_circulation:
+              self._circulation.start()
+
+      def get_state(self) -> PhysioState:
+          """
+          Get current biological state.
+
+          Returns:
+              Complete PhysioState snapshot
+          """
+          hormones = self._endocrine.get_all_hormones()
+          vitals = self._vitals.get_state()
+
+          return PhysioState(
+              **hormones,
+              heart_rate=vitals.heart_rate,
+              breathing_rate=vitals.breathing_rate,
+              temperature=vitals.temperature
+          )
+
+      def process_stimulus(self, stimulus: str, intensity: float = 0.5) -> PhysioState:
+          """
+          Process a named stimulus.
+
+          Triggers appropriate hormone cascade.
+
+          Args:
+              stimulus: Stimulus type (emotion or trigger name)
+              intensity: How strong (0-1)
+
+          Returns:
+              New state after processing
+          """
+          # Try as cascade first
+          if stimulus in self._cascade.get_cascade_names():
+              self._cascade.trigger_cascade(stimulus, intensity)
+          else:
+              # Try as emotion
+              self._cascade.trigger_by_emotion(stimulus, intensity)
+
+          # Update circulation
+          self._sync_circulation()
+
+          state = self.get_state()
+          self._publish_state(state)
+          return state
+
+      def stimulate_hormone(self, hormone: str, intensity: float) -> PhysioState:
+          """
+          Directly stimulate a hormone.
+
+          Args:
+              hormone: Hormone name
+              intensity: Stimulation intensity (0-1)
+
+          Returns:
+              New state
+          """
+          self._endocrine.stimulate(hormone, intensity)
+          self._sync_circulation()
+
+          state = self.get_state()
+          self._publish_state(state)
+          return state
+
+      def update(self, dt: float = 1.0) -> PhysioState:
+          """
+          Update with time passage.
+
+          Args:
+              dt: Time delta in seconds
+
+          Returns:
+              State after update
+          """
+          # Decay hormones
+          self._endocrine.update(dt)
+          self._sync_circulation()
+
+          return self.get_state()
+
+      def _sync_circulation(self) -> None:
+          """Sync hormone levels to circulation."""
+          levels = self._endocrine.get_all_hormones()
+          self._circulation.set_levels(levels)
+
+          # Update vitals based on hormones
+          effective = self._receptors.process_hormones(levels)
+          self._vitals.update_from_hormones(effective)
+
+      def _on_circulation_tick(self, levels: Dict[str, float]) -> None:
+          """Callback from circulation system."""
+          effective = self._receptors.process_hormones(levels)
+          self._vitals.update_from_hormones(effective)
+
+      def _publish_state(self, state: PhysioState) -> None:
+          """Publish state to bus."""
+          if self._bus:
+              self._bus.publish("bus:physical", state.to_dict())
+
+      def start_circulation(self) -> None:
+          """Start 30Hz circulation."""
+          self._circulation.start()
+
+      def stop_circulation(self) -> None:
+          """Stop circulation."""
+          self._circulation.stop()
+
+      def reset(self) -> None:
+          """Reset to baseline."""
+          self._endocrine.reset_to_baseline()
+          self._vitals.reset()
+          self._receptors.reset_all()
+          self._sync_circulation()
+
+      # Convenience methods
+
+      def get_hormone(self, name: str) -> float:
+          """Get single hormone level."""
+          return self._endocrine.get_hormone(name)
+
+      def get_vitals(self) -> Dict[str, float]:
+          """Get vital signs."""
+          return self._vitals.get_state().to_dict()
+
+      def is_stressed(self) -> bool:
+          """Check if in stressed state (high cortisol/adrenaline)."""
+          cortisol = self._endocrine.get_hormone("cortisol")
+          adrenaline = self._endocrine.get_hormone("adrenaline")
+          return cortisol > 0.6 or adrenaline > 0.5
+  ```
+
+acceptance_criteria:
+  - File at physio_core/physio_engine.py
+  - Coordinates all subsystems
+  - process_stimulus() triggers cascades
+  - Publishes to bus:physical
+  - start/stop_circulation() for 30Hz mode
+
+depends_on: [P4-002, P4-004, P4-005, P4-006, P4-007, P4-008]
+blocks: [P4-010]

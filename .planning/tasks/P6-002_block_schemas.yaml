@@ -1,0 +1,116 @@
+# Task: Define Block Schemas
+id: P6-002
+phase: 6
+title: "Define Block schemas"
+status: pending
+priority: high
+estimated_lines: 100
+
+description: |
+  Define schemas for the 7 Master Blocks.
+
+output_file: "gks/schema/block_schema.py"
+
+spec: |
+  ```python
+  """Block Schema - Knowledge block definitions."""
+
+  from dataclasses import dataclass, field
+  from typing import Dict, Any, List
+  from enum import Enum
+
+
+  class BlockType(Enum):
+      """The 7 Master Block types."""
+      MASTER = "master"
+      ALGORITHM_HOW = "algorithm_how"
+      CONCEPT_WHY = "concept_why"
+      FRAMEWORK = "framework"
+      PARAMETER_WHAT = "parameter_what"
+      PROTOCOL_PROCESS = "protocol_process"
+      SAFETY = "safety"
+
+
+  @dataclass
+  class KnowledgeEntry:
+      """A single knowledge entry."""
+      key: str
+      value: Any
+      description: str = ""
+      tags: List[str] = field(default_factory=list)
+
+
+  @dataclass
+  class KnowledgeBlock:
+      """
+      A Genesis Knowledge Block.
+
+      Read-only collection of innate knowledge.
+      """
+      block_type: BlockType
+      version: str
+      entries: Dict[str, KnowledgeEntry]
+      metadata: Dict[str, Any] = field(default_factory=dict)
+
+      def get(self, key: str) -> Any:
+          """Get entry value by key."""
+          entry = self.entries.get(key)
+          return entry.value if entry else None
+
+      def search(self, query: str) -> List[KnowledgeEntry]:
+          """Search entries by key or description."""
+          results = []
+          query_lower = query.lower()
+          for key, entry in self.entries.items():
+              if query_lower in key.lower() or query_lower in entry.description.lower():
+                  results.append(entry)
+          return results
+
+      def list_keys(self) -> List[str]:
+          """List all entry keys."""
+          return list(self.entries.keys())
+
+      def to_dict(self) -> Dict[str, Any]:
+          """Convert to dictionary."""
+          return {
+              "block_type": self.block_type.value,
+              "version": self.version,
+              "entries": {
+                  k: {
+                      "key": v.key,
+                      "value": v.value,
+                      "description": v.description,
+                      "tags": v.tags
+                  }
+                  for k, v in self.entries.items()
+              },
+              "metadata": self.metadata
+          }
+
+      @classmethod
+      def from_dict(cls, data: Dict[str, Any]) -> "KnowledgeBlock":
+          """Create from dictionary."""
+          entries = {}
+          for k, v in data.get("entries", {}).items():
+              entries[k] = KnowledgeEntry(
+                  key=v["key"],
+                  value=v["value"],
+                  description=v.get("description", ""),
+                  tags=v.get("tags", [])
+              )
+          return cls(
+              block_type=BlockType(data["block_type"]),
+              version=data.get("version", "1.0.0"),
+              entries=entries,
+              metadata=data.get("metadata", {})
+          )
+  ```
+
+acceptance_criteria:
+  - File at gks/schema/block_schema.py
+  - BlockType enum with 7 types
+  - KnowledgeBlock with entries
+  - Search and retrieval methods
+
+depends_on: [P6-001]
+blocks: [P6-003, P6-004]

@@ -1,0 +1,200 @@
+# Task: Implement 9D Dimensions
+id: P3-003
+phase: 3
+title: "Implement 9D emotion dimensions"
+status: pending
+priority: high
+estimated_lines: 200
+
+description: |
+  Implement the 9 emotion dimension handlers.
+  Each dimension has its own logic for updates.
+
+output_file: "eva_matrix/dimensions/dimensions.py"
+
+spec: |
+  ```python
+  """Emotion Dimensions - 9D handlers."""
+
+  from typing import Dict, Any, Callable
+  from dataclasses import dataclass
+
+
+  @dataclass
+  class DimensionConfig:
+      """Configuration for an emotion dimension."""
+      name: str
+      negative_pole: str
+      positive_pole: str
+      decay_rate: float = 0.1      # Return to neutral speed
+      sensitivity: float = 1.0     # Response to stimuli
+      baseline: float = 0.0        # Resting value
+
+
+  DIMENSION_CONFIGS = {
+      "pleasure": DimensionConfig(
+          name="pleasure",
+          negative_pole="pain",
+          positive_pole="pleasure",
+          decay_rate=0.15,
+          sensitivity=1.2
+      ),
+      "arousal": DimensionConfig(
+          name="arousal",
+          negative_pole="calm",
+          positive_pole="excited",
+          decay_rate=0.2,
+          sensitivity=1.0
+      ),
+      "dominance": DimensionConfig(
+          name="dominance",
+          negative_pole="submissive",
+          positive_pole="dominant",
+          decay_rate=0.08,
+          sensitivity=0.8
+      ),
+      "openness": DimensionConfig(
+          name="openness",
+          negative_pole="closed",
+          positive_pole="open",
+          decay_rate=0.1,
+          sensitivity=0.9
+      ),
+      "certainty": DimensionConfig(
+          name="certainty",
+          negative_pole="uncertain",
+          positive_pole="certain",
+          decay_rate=0.12,
+          sensitivity=1.1
+      ),
+      "anticipation": DimensionConfig(
+          name="anticipation",
+          negative_pole="surprised",
+          positive_pole="anticipating",
+          decay_rate=0.25,
+          sensitivity=1.3
+      ),
+      "trust": DimensionConfig(
+          name="trust",
+          negative_pole="distrust",
+          positive_pole="trust",
+          decay_rate=0.05,
+          sensitivity=0.7
+      ),
+      "interest": DimensionConfig(
+          name="interest",
+          negative_pole="bored",
+          positive_pole="interested",
+          decay_rate=0.18,
+          sensitivity=1.1
+      ),
+      "warmth": DimensionConfig(
+          name="warmth",
+          negative_pole="cold",
+          positive_pole="warm",
+          decay_rate=0.1,
+          sensitivity=1.0
+      )
+  }
+
+
+  class DimensionHandler:
+      """
+      Handles updates to a single emotion dimension.
+      """
+
+      def __init__(self, config: DimensionConfig):
+          self._config = config
+          self._current = config.baseline
+
+      @property
+      def value(self) -> float:
+          return self._current
+
+      @value.setter
+      def value(self, v: float):
+          self._current = max(-1.0, min(1.0, v))
+
+      def apply_stimulus(self, intensity: float) -> float:
+          """
+          Apply stimulus to dimension.
+
+          Args:
+              intensity: -1.0 to 1.0 (negative = towards negative pole)
+
+          Returns:
+              New value after stimulus
+          """
+          delta = intensity * self._config.sensitivity
+          self._current += delta
+          self._current = max(-1.0, min(1.0, self._current))
+          return self._current
+
+      def decay(self, dt: float = 1.0) -> float:
+          """
+          Decay towards baseline over time.
+
+          Args:
+              dt: Time delta (seconds)
+
+          Returns:
+              New value after decay
+          """
+          diff = self._config.baseline - self._current
+          decay_amount = diff * self._config.decay_rate * dt
+          self._current += decay_amount
+          return self._current
+
+
+  class DimensionManager:
+      """
+      Manages all 9 emotion dimensions.
+      """
+
+      def __init__(self):
+          self._handlers: Dict[str, DimensionHandler] = {}
+          for name, config in DIMENSION_CONFIGS.items():
+              self._handlers[name] = DimensionHandler(config)
+
+      def get(self, dimension: str) -> float:
+          """Get current value of dimension."""
+          if dimension in self._handlers:
+              return self._handlers[dimension].value
+          return 0.0
+
+      def set(self, dimension: str, value: float) -> None:
+          """Set dimension value directly."""
+          if dimension in self._handlers:
+              self._handlers[dimension].value = value
+
+      def apply_stimulus(self, dimension: str, intensity: float) -> float:
+          """Apply stimulus to a dimension."""
+          if dimension in self._handlers:
+              return self._handlers[dimension].apply_stimulus(intensity)
+          return 0.0
+
+      def decay_all(self, dt: float = 1.0) -> Dict[str, float]:
+          """Decay all dimensions towards baseline."""
+          result = {}
+          for name, handler in self._handlers.items():
+              result[name] = handler.decay(dt)
+          return result
+
+      def get_all(self) -> Dict[str, float]:
+          """Get all dimension values."""
+          return {name: h.value for name, h in self._handlers.items()}
+
+      def apply_emotion_vector(self, vector: Dict[str, float]) -> None:
+          """Apply multiple stimuli at once."""
+          for dim, intensity in vector.items():
+              self.apply_stimulus(dim, intensity)
+  ```
+
+acceptance_criteria:
+  - File at eva_matrix/dimensions/dimensions.py
+  - 9 dimension configs defined
+  - DimensionHandler with stimulus and decay
+  - DimensionManager coordinates all
+
+depends_on: [P3-002]
+blocks: [P3-005]

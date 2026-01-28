@@ -1,0 +1,120 @@
+# Task: Implement Chat Endpoint
+id: P7-002
+phase: 7
+title: "Implement Chat endpoint"
+status: pending
+priority: high
+estimated_lines: 100
+
+description: |
+  Implement the main chat endpoint.
+  This is the primary way to interact with EVA.
+
+output_file: "api/routes/chat.py"
+
+spec: |
+  ```python
+  """Chat Endpoint - Main conversation interface."""
+
+  from fastapi import APIRouter, HTTPException
+  from pydantic import BaseModel
+  from typing import Optional, Dict, Any
+
+  router = APIRouter(prefix="/chat", tags=["chat"])
+
+
+  class ChatRequest(BaseModel):
+      """Chat request body."""
+      message: str
+      user_id: Optional[str] = "default"
+      session_id: Optional[str] = None
+
+
+  class ChatResponse(BaseModel):
+      """Chat response body."""
+      response: str
+      user_id: str
+      session_id: str
+      context_used: Dict[str, Any]
+      model: str
+      tokens_used: int
+
+
+  # Global orchestrator reference (set during startup)
+  _orchestrator = None
+
+
+  def set_orchestrator(orch) -> None:
+      """Set the orchestrator instance."""
+      global _orchestrator
+      _orchestrator = orch
+
+
+  @router.post("/", response_model=ChatResponse)
+  async def chat(request: ChatRequest) -> ChatResponse:
+      """
+      Send a message to EVA and get response.
+
+      This is the main conversation endpoint.
+      Processes through the full cognitive flow.
+      """
+      if _orchestrator is None:
+          raise HTTPException(
+              status_code=503,
+              detail="System not initialized"
+          )
+
+      try:
+          result = _orchestrator.process(request.message)
+
+          return ChatResponse(
+              response=result.content,
+              user_id=request.user_id,
+              session_id=request.session_id or "default",
+              context_used=result.context_used,
+              model=result.model,
+              tokens_used=result.tokens_used
+          )
+
+      except Exception as e:
+          raise HTTPException(
+              status_code=500,
+              detail=f"Processing error: {str(e)}"
+          )
+
+
+  @router.post("/clear")
+  async def clear_history() -> Dict[str, str]:
+      """Clear conversation history."""
+      if _orchestrator:
+          _orchestrator.clear_history()
+      return {"status": "cleared"}
+
+
+  @router.get("/history")
+  async def get_history() -> Dict[str, Any]:
+      """Get conversation history."""
+      if _orchestrator is None:
+          return {"history": []}
+
+      history = _orchestrator.get_history()
+      return {
+          "history": [
+              {
+                  "role": h.role,
+                  "content": h.content,
+                  "timestamp": h.timestamp.isoformat()
+              }
+              for h in history
+          ]
+      }
+  ```
+
+acceptance_criteria:
+  - File at api/routes/chat.py
+  - POST /chat endpoint
+  - Returns ChatResponse with metadata
+  - Error handling
+
+depends_on: [P7-001]
+blocks: [P7-005]

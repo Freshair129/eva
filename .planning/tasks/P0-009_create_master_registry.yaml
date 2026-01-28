@@ -1,0 +1,184 @@
+# Task: Create Master Registry
+id: P0-009
+phase: 0
+title: "Create master_registry.yaml"
+status: done
+priority: medium
+estimated_lines: 100
+
+# Description
+description: |
+  Create the master registry YAML file that defines:
+  - System topology
+  - Boot sequence
+  - Permissions
+  - Bus channels
+
+  This is the Single Source of Truth (SSOT) for system configuration.
+
+# Output
+output_file: "config/master_registry.yaml"
+
+# Specification
+spec: |
+  ```yaml
+  # EVA Master Registry v0.1.0
+  # Single Source of Truth for System Topology
+
+  schema: EVA-MasterRegistry-v0.1.0
+  version: 0.1.0
+  codename: "Genesis"
+
+  # ============================================================
+  # 1. GLOBAL POLICIES
+  # ============================================================
+  policies:
+    architecture:
+      pattern: "Ports & Adapters"
+      structure: "Flat Anatomy"
+
+    versioning:
+      format: "MAJOR.MINOR.PATCH"
+      pre_release: true  # 0.x.x = development
+
+  # ============================================================
+  # 2. BUS CHANNELS
+  # ============================================================
+  bus_channels:
+    - id: "bus:physical"
+      description: "PhysioCore state broadcasts"
+      publishers: [PhysioCore]
+      subscribers: [EVAMatrix, MSP]
+
+    - id: "bus:psychological"
+      description: "EVA Matrix emotional state"
+      publishers: [EVAMatrix]
+      subscribers: [Orchestrator, MSP]
+
+    - id: "bus:phenomenological"
+      description: "Qualia perceptual state"
+      publishers: [ArtifactQualia]
+      subscribers: [MSP]
+
+    - id: "bus:memory"
+      description: "Memory events"
+      publishers: [MSP]
+      subscribers: [Orchestrator]
+
+  # ============================================================
+  # 3. SYSTEMS REGISTRY
+  # ============================================================
+  systems:
+    # --- Phase 0: Foundation ---
+    - id: SimpleBus
+      version: 0.1.0
+      phase: 0
+      type: infrastructure
+      entry_point: adapters.simple_bus.SimpleBus
+      status: pending
+
+    # --- Phase 1: Memory ---
+    - id: MSP
+      version: 0.1.0
+      phase: 1
+      type: core_system
+      entry_point: msp.msp_engine.MSP
+      dependencies: [SimpleBus]
+      status: pending
+
+    # --- Phase 2: Orchestration ---
+    - id: Orchestrator
+      version: 0.1.0
+      phase: 2
+      type: core_system
+      entry_point: orchestrator.orchestrator.Orchestrator
+      dependencies: [MSP, SimpleBus]
+      status: pending
+
+    # --- Phase 3: Psychology ---
+    - id: EVAMatrix
+      version: 0.1.0
+      phase: 3
+      type: organ
+      entry_point: eva_matrix.eva_matrix.EVAMatrix
+      dependencies: [SimpleBus]
+      status: pending
+
+    # --- Phase 4: Biology ---
+    - id: PhysioCore
+      version: 0.1.0
+      phase: 4
+      type: organ
+      entry_point: physio_core.physio_core.PhysioCore
+      dependencies: [SimpleBus]
+      status: pending
+
+    # --- Phase 5: Perception ---
+    - id: RMS
+      version: 0.1.0
+      phase: 5
+      type: core_system
+      entry_point: rms.rms_engine.RMS
+      dependencies: [SimpleBus]
+      status: pending
+
+    - id: ArtifactQualia
+      version: 0.1.0
+      phase: 5
+      type: organ
+      entry_point: qualia.qualia_engine.ArtifactQualia
+      dependencies: [SimpleBus, RMS]
+      status: pending
+
+  # ============================================================
+  # 4. BOOT SEQUENCE
+  # ============================================================
+  boot_sequence:
+    phase_0:
+      - SimpleBus
+    phase_1:
+      - MSP
+    phase_2:
+      - Orchestrator
+    phase_3:
+      - EVAMatrix
+    phase_4:
+      - PhysioCore
+    phase_5:
+      - RMS
+      - ArtifactQualia
+
+  # ============================================================
+  # 5. ADAPTERS REGISTRY
+  # ============================================================
+  adapters:
+    mocks:
+      - id: MockPhysioProvider
+        implements: IStateProvider
+        phase: 0
+
+      - id: MockMatrixProvider
+        implements: IStateProvider
+        phase: 0
+
+      - id: MockResonanceEncoder
+        implements: IResonanceEncoder
+        phase: 0
+
+    production:
+      - id: ChromaVectorBridge
+        implements: IVectorBridge
+        phase: 1
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at config/master_registry.yaml
+  - Valid YAML syntax
+  - All systems defined with phase number
+  - Bus channels documented
+  - Boot sequence defined
+
+# Dependencies
+depends_on: []
+blocks: []

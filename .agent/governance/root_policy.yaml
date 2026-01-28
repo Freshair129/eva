@@ -1,0 +1,94 @@
+# EVA Genesis Root Governance Policy
+# Version: 0.1.0
+# Purpose: Enforce flat anatomy and prevent root pollution
+
+# === ALLOWED ROOT FILES ===
+allowed_root_files:
+  - CLAUDE.md                # Claude Code context (MUST be at root)
+  - PROJECT.md               # Project overview
+  - VERSION                  # Version number
+  - CHANGELOG.md             # Version history
+  - .gitignore               # Git ignore patterns
+  - .env                     # Environment config (if needed)
+  - pytest.ini               # Pytest configuration
+  - pyproject.toml           # Python project config (if needed)
+  - requirements.txt         # Dependencies (if needed)
+
+# === ALLOWED ROOT DIRECTORIES ===
+allowed_root_dirs:
+  # Infrastructure
+  - .git
+  - .agent
+  - .planning
+  - .venv                    # Virtual environment (if used)
+
+  # Core Architecture
+  - contracts                # Port interfaces
+  - adapters                 # Adapter implementations
+  - config                   # Configuration files
+
+  # Systems (Phase 1+)
+  - msp                      # Memory & Soul Passport
+  - orchestrator             # Central Nervous System
+  - eva_matrix               # Psychology (Phase 3+)
+  - physio_core              # Biology (Phase 4+)
+  - rms                      # Resonance Memory System (Phase 5+)
+  - qualia                   # Phenomenology (Phase 5+)
+  - gks                      # Genesis Knowledge (Phase 6+)
+
+  # Data Domains
+  - consciousness            # Runtime state (RAM)
+  - memory                   # Persistent storage
+
+  # Development
+  - tests                    # All tests
+  - docs                     # Documentation
+  - scripts                  # Utility scripts (if needed)
+  - api                      # API layer (Phase 7+)
+
+# === ENFORCEMENT SETTINGS ===
+enforcement:
+  pre_commit_hook: false     # Not yet implemented
+  ci_check: false            # Not yet implemented
+  developer_notify: warning  # Show warnings
+  auto_cleanup: false        # Manual cleanup only
+
+# === CLEANUP DESTINATIONS ===
+# Where to move files that violate root policy
+cleanup_destinations:
+  "*.md":
+    primary: docs/
+    archive: docs/99_Archive/
+  "*.yaml":
+    primary: config/
+    tasks: .planning/tasks/
+  "*.py":
+    scripts: scripts/
+    tests: tests/
+
+# === PHASE-SPECIFIC DIRECTORIES ===
+# Directories that should only exist after certain phases
+phase_requirements:
+  phase_0:
+    - contracts
+    - adapters
+    - config
+    - tests
+    - docs
+  phase_1:
+    - msp
+    - consciousness
+    - memory
+  phase_2:
+    - orchestrator
+  phase_3:
+    - eva_matrix
+  phase_4:
+    - physio_core
+  phase_5:
+    - rms
+    - qualia
+  phase_6:
+    - gks
+  phase_7:
+    - api

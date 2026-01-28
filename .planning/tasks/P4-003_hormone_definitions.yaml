@@ -1,0 +1,189 @@
+# Task: Implement Hormone Definitions
+id: P4-003
+phase: 4
+title: "Implement Hormone definitions"
+status: pending
+priority: high
+estimated_lines: 150
+
+description: |
+  Define the 12 hormones with their properties:
+  - Baseline levels
+  - Half-lives
+  - Decay rates
+  - Interactions
+
+output_file: "physio_core/endocrine/hormones.py"
+
+spec: |
+  ```python
+  """Hormone Definitions - 12 hormone types."""
+
+  from dataclasses import dataclass
+  from typing import Dict, List
+  from enum import Enum
+
+
+  class HormoneType(Enum):
+      """The 12 hormone types."""
+      DOPAMINE = "dopamine"
+      SEROTONIN = "serotonin"
+      OXYTOCIN = "oxytocin"
+      CORTISOL = "cortisol"
+      ADRENALINE = "adrenaline"
+      NORADRENALINE = "noradrenaline"
+      GABA = "gaba"
+      ACETYLCHOLINE = "acetylcholine"
+      ENDORPHIN = "endorphin"
+      TESTOSTERONE = "testosterone"
+      ESTROGEN = "estrogen"
+      MELATONIN = "melatonin"
+
+
+  @dataclass
+  class HormoneDefinition:
+      """
+      Definition of a hormone's behavior.
+
+      Attributes:
+          name: Hormone identifier
+          baseline: Resting level (0-1)
+          half_life: Time to decay 50% (seconds)
+          max_level: Maximum possible level
+          min_level: Minimum possible level
+          release_rate: How quickly it releases
+          antagonists: Hormones that reduce this one
+          synergists: Hormones that enhance this one
+      """
+      name: str
+      baseline: float
+      half_life: float
+      max_level: float = 1.0
+      min_level: float = 0.0
+      release_rate: float = 0.1
+      antagonists: List[str] = None
+      synergists: List[str] = None
+
+      def __post_init__(self):
+          self.antagonists = self.antagonists or []
+          self.synergists = self.synergists or []
+
+
+  HORMONE_DEFINITIONS: Dict[str, HormoneDefinition] = {
+      "dopamine": HormoneDefinition(
+          name="dopamine",
+          baseline=0.5,
+          half_life=30.0,
+          release_rate=0.15,
+          antagonists=["cortisol"],
+          synergists=["endorphin"]
+      ),
+      "serotonin": HormoneDefinition(
+          name="serotonin",
+          baseline=0.5,
+          half_life=45.0,
+          release_rate=0.08,
+          antagonists=["cortisol", "adrenaline"],
+          synergists=["oxytocin"]
+      ),
+      "oxytocin": HormoneDefinition(
+          name="oxytocin",
+          baseline=0.5,
+          half_life=180.0,
+          release_rate=0.05,
+          antagonists=["cortisol"],
+          synergists=["dopamine", "serotonin"]
+      ),
+      "cortisol": HormoneDefinition(
+          name="cortisol",
+          baseline=0.3,
+          half_life=90.0,
+          release_rate=0.12,
+          antagonists=["oxytocin", "gaba"],
+          synergists=["adrenaline"]
+      ),
+      "adrenaline": HormoneDefinition(
+          name="adrenaline",
+          baseline=0.2,
+          half_life=20.0,
+          release_rate=0.25,
+          antagonists=["gaba", "serotonin"],
+          synergists=["cortisol", "noradrenaline"]
+      ),
+      "noradrenaline": HormoneDefinition(
+          name="noradrenaline",
+          baseline=0.3,
+          half_life=25.0,
+          release_rate=0.2,
+          antagonists=["gaba"],
+          synergists=["adrenaline"]
+      ),
+      "gaba": HormoneDefinition(
+          name="gaba",
+          baseline=0.5,
+          half_life=60.0,
+          release_rate=0.1,
+          antagonists=["adrenaline", "cortisol"],
+          synergists=["serotonin"]
+      ),
+      "acetylcholine": HormoneDefinition(
+          name="acetylcholine",
+          baseline=0.5,
+          half_life=15.0,
+          release_rate=0.2,
+          antagonists=[],
+          synergists=["dopamine"]
+      ),
+      "endorphin": HormoneDefinition(
+          name="endorphin",
+          baseline=0.4,
+          half_life=120.0,
+          release_rate=0.08,
+          antagonists=["cortisol"],
+          synergists=["dopamine"]
+      ),
+      "testosterone": HormoneDefinition(
+          name="testosterone",
+          baseline=0.5,
+          half_life=600.0,  # Slower cycle
+          release_rate=0.02,
+          antagonists=["cortisol"],
+          synergists=[]
+      ),
+      "estrogen": HormoneDefinition(
+          name="estrogen",
+          baseline=0.5,
+          half_life=600.0,
+          release_rate=0.02,
+          antagonists=[],
+          synergists=["oxytocin"]
+      ),
+      "melatonin": HormoneDefinition(
+          name="melatonin",
+          baseline=0.3,
+          half_life=30.0,
+          release_rate=0.1,
+          antagonists=["adrenaline", "cortisol"],
+          synergists=["gaba"]
+      )
+  }
+
+
+  def get_hormone_def(name: str) -> HormoneDefinition:
+      """Get definition for a hormone."""
+      return HORMONE_DEFINITIONS.get(name)
+
+
+  def get_all_hormone_names() -> List[str]:
+      """Get all hormone names."""
+      return list(HORMONE_DEFINITIONS.keys())
+  ```
+
+acceptance_criteria:
+  - File at physio_core/endocrine/hormones.py
+  - All 12 hormones defined
+  - Properties: baseline, half_life, antagonists, synergists
+  - HormoneType enum for type safety
+
+depends_on: [P4-002]
+blocks: [P4-004, P4-005]

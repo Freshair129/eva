@@ -1,0 +1,128 @@
+# Task: Wire GKS to CIM
+id: P6-006
+phase: 6
+title: "Wire GKS ↔ CIM"
+status: pending
+priority: high
+estimated_lines: 60
+
+description: |
+  Create integration between GKS and CIM.
+  CIM can inject knowledge into context.
+
+output_file: "gks/integration.py"
+
+spec: |
+  ```python
+  """GKS Integration - Wiring to CIM."""
+
+  from typing import Optional
+  from gks.gks_engine import GKSEngine
+  from gks.schema.block_schema import BlockType
+
+
+  class GKSContextProvider:
+      """
+      Provides GKS knowledge for CIM injection.
+      """
+
+      def __init__(self, gks: GKSEngine = None):
+          """
+          Initialize provider.
+
+          Args:
+              gks: GKSEngine instance
+          """
+          self._gks = gks or GKSEngine()
+
+      def get_identity_context(self) -> str:
+          """
+          Get identity context for system prompt.
+
+          Returns:
+              Formatted identity information
+          """
+          identity = self._gks.get_system_identity()
+          if not identity:
+              return ""
+
+          return f"""## System Identity
+Name: {identity.get('name', 'EVA')} ({identity.get('full_name', 'Embodied Virtual Agent')})
+Philosophy: {identity.get('philosophy', 'Embodied Existentialism')}
+"""
+
+      def get_safety_context(self) -> str:
+          """
+          Get safety directives for system prompt.
+
+          Returns:
+              Formatted safety rules
+          """
+          directives = self._gks.get_safety_directives()
+          if not directives:
+              return ""
+
+          lines = ["## Safety Directives (CRITICAL)"]
+          for d in directives:
+              lines.append(f"- {d.value}")
+          return "\n".join(lines)
+
+      def get_relevant_knowledge(self, query: str, max_entries: int = 5) -> str:
+          """
+          Get knowledge relevant to a query.
+
+          Args:
+              query: Search query
+              max_entries: Max entries to return
+
+          Returns:
+              Formatted relevant knowledge
+          """
+          entries = self._gks.search(query)[:max_entries]
+          if not entries:
+              return ""
+
+          lines = ["## Relevant Knowledge"]
+          for e in entries:
+              lines.append(f"- {e.key}: {e.value}")
+          return "\n".join(lines)
+
+      def get_full_context(self) -> str:
+          """
+          Get complete GKS context for injection.
+
+          Returns:
+              All formatted knowledge
+          """
+          return self._gks.get_all_for_context()
+
+
+  def wire_gks_to_cim(cim_engine, gks: GKSEngine) -> None:
+      """
+      Wire GKS to CIM for knowledge injection.
+
+      Args:
+          cim_engine: CIMEngine instance
+          gks: GKSEngine instance
+      """
+      provider = GKSContextProvider(gks)
+
+      # Add identity and safety to system identity
+      current_identity = getattr(cim_engine, '_system_identity', '')
+      enhanced_identity = f"""{current_identity}
+
+{provider.get_identity_context()}
+
+{provider.get_safety_context()}
+"""
+      cim_engine.set_system_identity(enhanced_identity)
+  ```
+
+acceptance_criteria:
+  - File at gks/integration.py
+  - GKSContextProvider formats for CIM
+  - Identity and safety injected
+  - wire_gks_to_cim() connects systems
+
+depends_on: [P6-005, P2-005]
+blocks: []

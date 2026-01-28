@@ -1,0 +1,135 @@
+# Task: Implement Memory Endpoint
+id: P7-004
+phase: 7
+title: "Implement Memory endpoint"
+status: pending
+priority: medium
+estimated_lines: 80
+
+description: |
+  Implement memory operations endpoint.
+  Query and manage EVA's memories.
+
+output_file: "api/routes/memory.py"
+
+spec: |
+  ```python
+  """Memory Endpoint - Memory operations."""
+
+  from fastapi import APIRouter, Query
+  from pydantic import BaseModel
+  from typing import Dict, Any, List, Optional
+
+  router = APIRouter(prefix="/memory", tags=["memory"])
+
+  # Global MSP reference
+  _msp = None
+
+
+  def set_msp(msp) -> None:
+      """Set MSP reference."""
+      global _msp
+      _msp = msp
+
+
+  class RecallRequest(BaseModel):
+      """Memory recall request."""
+      query: str
+      limit: int = 5
+      memory_type: Optional[str] = None
+
+
+  class MemoryResponse(BaseModel):
+      """Memory response."""
+      id: str
+      type: str
+      content: str
+      timestamp: str
+
+
+  @router.post("/recall")
+  async def recall_memories(request: RecallRequest) -> Dict[str, Any]:
+      """
+      Recall memories by semantic search.
+      """
+      if _msp is None:
+          return {"memories": [], "error": "MSP not initialized"}
+
+      memories = _msp.recall(
+          request.query,
+          limit=request.limit,
+          memory_type=request.memory_type
+      )
+
+      return {
+          "query": request.query,
+          "memories": [
+              {
+                  "id": m.id,
+                  "type": m.__class__.__name__,
+                  "data": m.to_dict()
+              }
+              for m in memories
+          ]
+      }
+
+
+  @router.get("/list/{memory_type}")
+  async def list_memories(
+      memory_type: str,
+      limit: int = Query(20, ge=1, le=100)
+  ) -> Dict[str, Any]:
+      """
+      List memories by type.
+
+      memory_type: 'episodic', 'semantic', or 'sensory'
+      """
+      if _msp is None:
+          return {"memories": [], "error": "MSP not initialized"}
+
+      memories = _msp.list_memories(memory_type)[:limit]
+
+      return {
+          "type": memory_type,
+          "count": len(memories),
+          "memories": [m.to_dict() for m in memories]
+      }
+
+
+  @router.get("/{memory_id}")
+  async def get_memory(memory_id: str) -> Dict[str, Any]:
+      """Get a specific memory by ID."""
+      if _msp is None:
+          return {"error": "MSP not initialized"}
+
+      memory = _msp.get(memory_id)
+      if memory is None:
+          return {"error": "Memory not found"}
+
+      return {
+          "id": memory_id,
+          "type": memory.__class__.__name__,
+          "data": memory.to_dict()
+      }
+
+
+  @router.delete("/{memory_id}")
+  async def forget_memory(memory_id: str) -> Dict[str, str]:
+      """Delete (forget) a memory."""
+      if _msp is None:
+          return {"error": "MSP not initialized"}
+
+      success = _msp.forget(memory_id)
+      if success:
+          return {"status": "forgotten", "id": memory_id}
+      return {"status": "not_found", "id": memory_id}
+  ```
+
+acceptance_criteria:
+  - File at api/routes/memory.py
+  - POST /memory/recall for search
+  - GET /memory/list/{type}
+  - GET/DELETE individual memories
+
+depends_on: [P7-002]
+blocks: [P7-005]

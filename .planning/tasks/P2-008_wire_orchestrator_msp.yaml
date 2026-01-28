@@ -1,0 +1,180 @@
+# Task: Wire Orchestrator to MSP
+id: P2-008
+phase: 2
+title: "Wire Orchestrator ↔ MSP"
+status: pending
+priority: high
+estimated_lines: 60
+
+description: |
+  Create integration between Orchestrator and MSP.
+  After each turn, store as episodic memory.
+  Before each turn, retrieve relevant memories.
+
+output_file: "orchestrator/integration/msp_integration.py"
+
+spec: |
+  ```python
+  """MSP Integration - Memory hooks for Orchestrator."""
+
+  from typing import Optional, Dict, Any
+  from datetime import datetime
+
+  from msp.msp_engine import MSPEngine
+  from orchestrator.orchestrator_engine import OrchestratorEngine, OrchestratorResponse
+
+
+  class MSPIntegration:
+      """
+      Handles memory operations during conversation.
+
+      Provides hooks to:
+      - Store conversations as episodic memories
+      - Extract semantic facts from conversations
+      """
+
+      def __init__(self, msp: MSPEngine):
+          """
+          Initialize integration.
+
+          Args:
+              msp: MSP engine instance
+          """
+          self._msp = msp
+
+      def store_turn(
+          self,
+          user_input: str,
+          response: str,
+          emotional_context: Dict[str, float] = None,
+          participants: list = None
+      ) -> str:
+          """
+          Store a conversation turn as episodic memory.
+
+          Args:
+              user_input: What user said
+              response: What EVA said
+              emotional_context: Emotions during turn
+              participants: Who was involved
+
+          Returns:
+              Memory ID
+          """
+          content = f"User: {user_input}\nEVA: {response}"
+          summary = self._generate_summary(user_input, response)
+
+          memory = self._msp.store_episodic(
+              content=content,
+              summary=summary,
+              emotional_context=emotional_context or {},
+              participants=participants or ["user", "eva"],
+              importance=self._calculate_importance(user_input, response)
+          )
+
+          return memory.id
+
+      def _generate_summary(self, user_input: str, response: str) -> str:
+          """Generate brief summary of turn."""
+          # Simple approach: first sentence of response
+          first_sentence = response.split('.')[0] + '.'
+          if len(first_sentence) > 100:
+              first_sentence = first_sentence[:100] + '...'
+          return f"Discussed: {first_sentence}"
+
+      def _calculate_importance(self, user_input: str, response: str) -> float:
+          """
+          Calculate importance score for memory.
+
+          Factors:
+          - Length (longer = more important)
+          - Question marks (questions are important)
+          - Emotional words
+          """
+          importance = 0.5  # Base
+
+          # Length factor
+          total_len = len(user_input) + len(response)
+          if total_len > 500:
+              importance += 0.1
+          if total_len > 1000:
+              importance += 0.1
+
+          # Questions
+          if '?' in user_input:
+              importance += 0.1
+
+          # Clamp to 0-1
+          return min(1.0, max(0.0, importance))
+
+      def extract_facts(self, user_input: str) -> None:
+          """
+          Extract semantic facts from user input.
+
+          Simple pattern matching for now.
+          Future: Use LLM for extraction.
+          """
+          # Pattern: "I am/like/have X"
+          patterns = [
+              ("I am ", "is"),
+              ("I'm ", "is"),
+              ("I like ", "likes"),
+              ("I have ", "has"),
+              ("My name is ", "has_name"),
+              ("I prefer ", "prefers"),
+          ]
+
+          user_lower = user_input.lower()
+
+          for pattern, predicate in patterns:
+              if pattern.lower() in user_lower:
+                  idx = user_lower.find(pattern.lower())
+                  obj = user_input[idx + len(pattern):].split('.')[0].split(',')[0].strip()
+                  if obj and len(obj) < 50:
+                      self._msp.store_semantic(
+                          subject="User",
+                          predicate=predicate,
+                          object=obj,
+                          source="conversation"
+                      )
+
+
+  def create_integrated_orchestrator(
+      orchestrator: OrchestratorEngine,
+      msp: MSPEngine
+  ) -> "IntegratedOrchestrator":
+      """
+      Factory to create orchestrator with MSP integration.
+      """
+      return IntegratedOrchestrator(orchestrator, MSPIntegration(msp))
+
+
+  class IntegratedOrchestrator:
+      """Orchestrator with automatic memory storage."""
+
+      def __init__(self, orchestrator: OrchestratorEngine, integration: MSPIntegration):
+          self._orchestrator = orchestrator
+          self._integration = integration
+
+      def process(self, user_input: str) -> OrchestratorResponse:
+          """Process with memory storage."""
+          # Extract facts first
+          self._integration.extract_facts(user_input)
+
+          # Process through orchestrator
+          response = self._orchestrator.process(user_input)
+
+          # Store turn
+          self._integration.store_turn(user_input, response.content)
+
+          return response
+  ```
+
+acceptance_criteria:
+  - File at orchestrator/integration/msp_integration.py
+  - store_turn() saves episodic memory
+  - extract_facts() detects simple patterns
+  - IntegratedOrchestrator wraps base orchestrator
+
+depends_on: [P2-007, P1-007]
+blocks: [P2-010]

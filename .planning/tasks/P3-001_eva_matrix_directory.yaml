@@ -1,0 +1,49 @@
+# Task: Create EVA Matrix Directory
+id: P3-001
+phase: 3
+title: "Create EVA Matrix directory structure"
+status: pending
+priority: high
+estimated_lines: 10
+
+description: |
+  Create EVA Matrix (psychology system) directory structure.
+  This is the emotional/psychological engine.
+
+output_files:
+  - "eva_matrix/__init__.py"
+  - "eva_matrix/dimensions/__init__.py"
+  - "eva_matrix/stress/__init__.py"
+  - "eva_matrix/schema/__init__.py"
+  - "eva_matrix/tests/__init__.py"
+
+spec: |
+  ```
+  eva_matrix/
+  ├── __init__.py
+  ├── dimensions/
+  │   └── __init__.py
+  ├── stress/
+  │   └── __init__.py
+  ├── schema/
+  │   └── __init__.py
+  └── tests/
+      └── __init__.py
+  ```
+
+  ## eva_matrix/__init__.py
+  ```python
+  """
+  EVA Matrix - Psychological State System
+
+  9-dimensional emotion model with stress tracking.
+  """
+  __version__ = "0.1.0"
+  ```
+
+acceptance_criteria:
+  - eva_matrix/ directory exists
+  - All subdirectories with __init__.py
+
+depends_on: []
+blocks: [P3-002, P3-003]

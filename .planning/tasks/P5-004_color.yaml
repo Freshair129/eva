@@ -1,0 +1,97 @@
+# Task: Implement Color Qualities
+id: P5-004
+phase: 5
+title: "Implement Color qualities"
+status: pending
+priority: medium
+estimated_lines: 60
+
+description: |
+  Implement color quality calculations.
+  Map emotions to colors.
+
+output_file: "perception/qualia/color.py"
+
+spec: |
+  ```python
+  """Color Qualities - Visual impressions."""
+
+  from typing import Dict
+  from perception.schema.qualia_state import ColorQualia
+
+
+  class ColorGenerator:
+      """
+      Generates color qualities from emotional state.
+
+      Maps emotions to colors:
+      - Joy → bright, saturated, warm
+      - Sadness → dark, desaturated, cool
+      - Anger → red hues, high saturation
+      - Calm → blue/green hues, low saturation
+      """
+
+      # Emotion to hue mappings (0-1, maps to color wheel)
+      # 0=red, 0.17=yellow, 0.33=green, 0.5=cyan, 0.67=blue, 0.83=magenta
+      EMOTION_HUES = {
+          "joy": 0.15,        # Yellow-orange
+          "sadness": 0.6,     # Blue
+          "anger": 0.0,       # Red
+          "fear": 0.75,       # Purple
+          "calm": 0.45,       # Cyan-green
+          "love": 0.95,       # Pink
+          "curiosity": 0.55,  # Cyan
+      }
+
+      def generate(self, psych_state: Dict[str, float]) -> ColorQualia:
+          """
+          Generate color from psychological state.
+
+          Args:
+              psych_state: Dict with emotion dimensions
+
+          Returns:
+              ColorQualia
+          """
+          pleasure = psych_state.get("pleasure", 0)
+          arousal = psych_state.get("arousal", 0)
+          warmth_emotion = psych_state.get("warmth", 0)
+          dominant = psych_state.get("dominant_emotion", "")
+
+          # Base hue from dominant emotion or calculate
+          if dominant in self.EMOTION_HUES:
+              hue = self.EMOTION_HUES[dominant]
+          else:
+              # Calculate from pleasure/arousal
+              # Pleasure shifts towards warm colors
+              # Arousal shifts towards red
+              hue = 0.5 - pleasure * 0.2 - arousal * 0.1
+              hue = hue % 1.0
+
+          # Saturation: arousal increases saturation
+          saturation = 0.5 + arousal * 0.3 + abs(pleasure) * 0.2
+          saturation = max(0, min(1, saturation))
+
+          # Brightness: pleasure increases brightness
+          brightness = 0.5 + pleasure * 0.3
+          brightness = max(0.2, min(1, brightness))
+
+          # Color warmth: emotional warmth + pleasure
+          warmth = 0.5 + warmth_emotion * 0.3 + pleasure * 0.1
+          warmth = max(0, min(1, warmth))
+
+          return ColorQualia(
+              hue=hue,
+              saturation=saturation,
+              brightness=brightness,
+              warmth=warmth
+          )
+  ```
+
+acceptance_criteria:
+  - File at perception/qualia/color.py
+  - ColorGenerator maps emotions to colors
+  - Hue, saturation, brightness, warmth
+
+depends_on: [P5-002]
+blocks: [P5-006]

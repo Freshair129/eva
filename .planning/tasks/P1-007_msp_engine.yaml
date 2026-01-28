@@ -1,0 +1,302 @@
+# Task: Create MSP Engine
+id: P1-007
+phase: 1
+title: "Create MSP Engine"
+status: pending
+priority: high
+estimated_lines: 150
+
+# Description
+description: |
+  Create the main MSP Engine that orchestrates memory operations.
+  This is the facade for all memory operations.
+
+  MSP Engine:
+  - Coordinates MemoryStore and ChromaBridge
+  - Provides high-level memory API
+  - Handles memory lifecycle
+
+# Output
+output_file: "msp/msp_engine.py"
+
+# Specification
+spec: |
+  ```python
+  """MSP Engine - Memory & Soul Passport core engine."""
+
+  from typing import List, Dict, Any, Optional, Union
+  from pathlib import Path
+  from datetime import datetime
+
+  from msp.schema.episodic import EpisodicMemory
+  from msp.schema.semantic import SemanticMemory
+  from msp.schema.sensory import SensoryMemory
+  from msp.storage.memory_store import MemoryStore
+  from msp.storage.chroma_bridge import ChromaBridge
+
+
+  MemoryType = Union[EpisodicMemory, SemanticMemory, SensoryMemory]
+
+
+  class MSPEngine:
+      """
+      Memory & Soul Passport Engine.
+
+      The central memory system for EVA. Coordinates:
+      - MemoryStore: Structured storage of memory objects
+      - ChromaBridge: Vector search for semantic retrieval
+
+      Attributes:
+          _store: MemoryStore instance
+          _chroma: ChromaBridge instance
+          _bus: Optional bus for publishing events
+      """
+
+      def __init__(
+          self,
+          storage_path: Optional[Path] = None,
+          chroma_path: Optional[str] = None,
+          bus = None
+      ):
+          """
+          Initialize MSP Engine.
+
+          Args:
+              storage_path: Path for JSON memory persistence
+              chroma_path: Path for ChromaDB persistence
+              bus: Optional bus for publishing memory events
+          """
+          self._store = MemoryStore(persistence_path=storage_path)
+          self._chroma = ChromaBridge(persist_directory=chroma_path)
+          self._bus = bus
+
+      # ==================== EPISODIC ====================
+
+      def store_episodic(
+          self,
+          content: str,
+          summary: str,
+          participants: List[str] = None,
+          emotional_context: Dict[str, float] = None,
+          importance: float = 0.5,
+          tags: List[str] = None
+      ) -> EpisodicMemory:
+          """
+          Store a new episodic memory.
+
+          Args:
+              content: Full memory content
+              summary: Brief summary
+              participants: List of participant IDs
+              emotional_context: Emotion dimensions at time of memory
+              importance: Importance score (0.0-1.0)
+              tags: Categorization tags
+
+          Returns:
+              The created EpisodicMemory
+          """
+          memory = EpisodicMemory(
+              content=content,
+              summary=summary,
+              participants=participants or [],
+              emotional_context=emotional_context or {},
+              importance=importance,
+              tags=tags or []
+          )
+
+          self._store.store(memory)
+
+          # Add to vector store
+          self._chroma.add_memory(
+              memory_id=memory.id,
+              content=f"{memory.summary} {memory.content}",
+              memory_type="episodic",
+              metadata={
+                  "importance": memory.importance,
+                  "timestamp": memory.timestamp.isoformat()
+              }
+          )
+
+          self._publish_event("memory:stored", {"type": "episodic", "id": memory.id})
+
+          return memory
+
+      # ==================== SEMANTIC ====================
+
+      def store_semantic(
+          self,
+          subject: str,
+          predicate: str,
+          object: str,
+          confidence: float = 0.8,
+          source: str = "conversation"
+      ) -> SemanticMemory:
+          """
+          Store a semantic fact.
+
+          Args:
+              subject: What/who this is about
+              predicate: The relationship
+              object: The value
+              confidence: Certainty score (0.0-1.0)
+              source: Where this came from
+
+          Returns:
+              The created SemanticMemory
+          """
+          memory = SemanticMemory(
+              subject=subject,
+              predicate=predicate,
+              object=object,
+              confidence=confidence,
+              source=source
+          )
+
+          self._store.store(memory)
+
+          # Add to vector store
+          self._chroma.add_memory(
+              memory_id=memory.id,
+              content=memory.as_triple(),
+              memory_type="semantic",
+              metadata={
+                  "confidence": memory.confidence,
+                  "subject": memory.subject
+              }
+          )
+
+          self._publish_event("memory:stored", {"type": "semantic", "id": memory.id})
+
+          return memory
+
+      # ==================== SENSORY ====================
+
+      def store_sensory(
+          self,
+          linked_episodic_id: str,
+          texture: Dict[str, float] = None,
+          color: Dict[str, float] = None,
+          soundscape: Dict[str, float] = None,
+          intensity: float = 0.5
+      ) -> SensoryMemory:
+          """
+          Store sensory/qualia data linked to an episodic memory.
+
+          Args:
+              linked_episodic_id: ID of the episodic memory
+              texture: Texture qualities
+              color: Color impressions
+              soundscape: Sound qualities
+              intensity: Overall intensity
+
+          Returns:
+              The created SensoryMemory
+          """
+          memory = SensoryMemory(
+              linked_episodic_id=linked_episodic_id,
+              texture=texture or {},
+              color=color or {},
+              soundscape=soundscape or {},
+              intensity=intensity
+          )
+
+          self._store.store(memory)
+
+          self._publish_event("memory:stored", {"type": "sensory", "id": memory.id})
+
+          return memory
+
+      # ==================== RETRIEVAL ====================
+
+      def recall(self, query: str, limit: int = 5,
+                 memory_type: Optional[str] = None) -> List[MemoryType]:
+          """
+          Recall memories by semantic similarity.
+
+          Args:
+              query: What to search for
+              limit: Max memories to return
+              memory_type: Optional filter ('episodic', 'semantic', 'sensory')
+
+          Returns:
+              List of matching memories, most similar first
+          """
+          # Search vector store
+          results = self._chroma.search(query, limit=limit, memory_type=memory_type)
+
+          # Retrieve full memory objects
+          memories = []
+          for result in results:
+              memory = self._store.retrieve(result['id'])
+              if memory:
+                  memories.append(memory)
+
+          return memories
+
+      def get(self, memory_id: str) -> Optional[MemoryType]:
+          """
+          Get a specific memory by ID.
+
+          Args:
+              memory_id: The memory ID
+
+          Returns:
+              Memory object or None
+          """
+          return self._store.retrieve(memory_id)
+
+      def list_memories(self, memory_type: str) -> List[MemoryType]:
+          """
+          List all memories of a type.
+
+          Args:
+              memory_type: One of 'episodic', 'semantic', 'sensory'
+
+          Returns:
+              List of memories
+          """
+          return self._store.list_by_type(memory_type)
+
+      # ==================== DELETION ====================
+
+      def forget(self, memory_id: str) -> bool:
+          """
+          Delete a memory.
+
+          Args:
+              memory_id: ID of memory to delete
+
+          Returns:
+              True if deleted
+          """
+          success = self._store.delete(memory_id)
+          if success:
+              self._chroma.delete_memory(memory_id)
+              self._publish_event("memory:deleted", {"id": memory_id})
+          return success
+
+      # ==================== INTERNAL ====================
+
+      def _publish_event(self, channel: str, data: Dict[str, Any]) -> None:
+          """Publish event to bus if available."""
+          if self._bus:
+              self._bus.publish(channel, data)
+
+      def clear(self) -> None:
+          """Clear all memories (for testing)."""
+          self._store.clear()
+          self._chroma.clear()
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at msp/msp_engine.py
+  - MSPEngine coordinates MemoryStore and ChromaBridge
+  - store_episodic(), store_semantic(), store_sensory() work
+  - recall() uses semantic search
+  - forget() removes from both stores
+  - Publishes events to bus if provided
+
+# Dependencies
+depends_on: [P1-005, P1-006]
+blocks: [P1-008]

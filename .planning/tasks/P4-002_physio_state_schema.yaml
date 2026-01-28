@@ -1,0 +1,156 @@
+# Task: Define PhysioState Schema
+id: P4-002
+phase: 4
+title: "Define PhysioState schema"
+status: pending
+priority: high
+estimated_lines: 100
+
+description: |
+  Define the PhysioState dataclass for biological state.
+  Includes hormone levels and vital signs.
+
+output_file: "physio_core/schema/physio_state.py"
+
+spec: |
+  ```python
+  """PhysioState Schema - Biological state."""
+
+  from dataclasses import dataclass, field
+  from datetime import datetime
+  from typing import Dict, Any
+
+
+  @dataclass
+  class HormoneLevel:
+      """Single hormone measurement."""
+      name: str
+      level: float  # 0.0 to 1.0
+      baseline: float = 0.5
+      half_life: float = 60.0  # seconds
+
+      @property
+      def deviation(self) -> float:
+          """How far from baseline."""
+          return self.level - self.baseline
+
+
+  @dataclass
+  class VitalSigns:
+      """Current vital measurements."""
+      heart_rate: float = 70.0      # BPM
+      breathing_rate: float = 16.0  # per minute
+      temperature: float = 37.0     # Celsius
+      blood_pressure_sys: float = 120.0
+      blood_pressure_dia: float = 80.0
+
+
+  @dataclass
+  class PhysioState:
+      """
+      Complete biological state snapshot.
+
+      Contains:
+      - 12 hormone levels
+      - Vital signs
+      - Timestamp
+      """
+
+      # 12 Hormones
+      dopamine: float = 0.5
+      serotonin: float = 0.5
+      oxytocin: float = 0.5
+      cortisol: float = 0.3
+      adrenaline: float = 0.2
+      noradrenaline: float = 0.3
+      gaba: float = 0.5
+      acetylcholine: float = 0.5
+      endorphin: float = 0.4
+      testosterone: float = 0.5
+      estrogen: float = 0.5
+      melatonin: float = 0.3
+
+      # Vitals
+      heart_rate: float = 70.0
+      breathing_rate: float = 16.0
+      temperature: float = 37.0
+
+      # Meta
+      timestamp: datetime = field(default_factory=datetime.now)
+
+      def __post_init__(self):
+          """Clamp hormone values to 0-1."""
+          hormones = [
+              'dopamine', 'serotonin', 'oxytocin', 'cortisol',
+              'adrenaline', 'noradrenaline', 'gaba', 'acetylcholine',
+              'endorphin', 'testosterone', 'estrogen', 'melatonin'
+          ]
+          for h in hormones:
+              setattr(self, h, max(0.0, min(1.0, getattr(self, h))))
+
+      def get_hormone(self, name: str) -> float:
+          """Get hormone level by name."""
+          return getattr(self, name, 0.5)
+
+      def set_hormone(self, name: str, value: float) -> None:
+          """Set hormone level."""
+          if hasattr(self, name):
+              setattr(self, name, max(0.0, min(1.0, value)))
+
+      def get_all_hormones(self) -> Dict[str, float]:
+          """Get all hormone levels."""
+          return {
+              "dopamine": self.dopamine,
+              "serotonin": self.serotonin,
+              "oxytocin": self.oxytocin,
+              "cortisol": self.cortisol,
+              "adrenaline": self.adrenaline,
+              "noradrenaline": self.noradrenaline,
+              "gaba": self.gaba,
+              "acetylcholine": self.acetylcholine,
+              "endorphin": self.endorphin,
+              "testosterone": self.testosterone,
+              "estrogen": self.estrogen,
+              "melatonin": self.melatonin
+          }
+
+      def to_dict(self) -> Dict[str, Any]:
+          """Convert to dictionary."""
+          return {
+              **self.get_all_hormones(),
+              "heart_rate": self.heart_rate,
+              "breathing_rate": self.breathing_rate,
+              "temperature": self.temperature,
+              "timestamp": self.timestamp.isoformat()
+          }
+
+      @classmethod
+      def from_dict(cls, data: Dict[str, Any]) -> "PhysioState":
+          """Create from dictionary."""
+          return cls(
+              dopamine=data.get("dopamine", 0.5),
+              serotonin=data.get("serotonin", 0.5),
+              oxytocin=data.get("oxytocin", 0.5),
+              cortisol=data.get("cortisol", 0.3),
+              adrenaline=data.get("adrenaline", 0.2),
+              noradrenaline=data.get("noradrenaline", 0.3),
+              gaba=data.get("gaba", 0.5),
+              acetylcholine=data.get("acetylcholine", 0.5),
+              endorphin=data.get("endorphin", 0.4),
+              testosterone=data.get("testosterone", 0.5),
+              estrogen=data.get("estrogen", 0.5),
+              melatonin=data.get("melatonin", 0.3),
+              heart_rate=data.get("heart_rate", 70.0),
+              breathing_rate=data.get("breathing_rate", 16.0),
+              temperature=data.get("temperature", 37.0)
+          )
+  ```
+
+acceptance_criteria:
+  - File at physio_core/schema/physio_state.py
+  - PhysioState with 12 hormones
+  - VitalSigns included
+  - Values clamped to valid ranges
+
+depends_on: [P4-001]
+blocks: [P4-003, P4-009]

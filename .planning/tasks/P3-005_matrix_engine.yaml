@@ -1,0 +1,181 @@
+# Task: Create Matrix Engine
+id: P3-005
+phase: 3
+title: "Create Matrix Engine"
+status: pending
+priority: high
+estimated_lines: 150
+
+description: |
+  Create the main EVA Matrix engine.
+  Coordinates dimensions and stress tracking.
+
+output_file: "eva_matrix/matrix_engine.py"
+
+spec: |
+  ```python
+  """Matrix Engine - Core psychological engine."""
+
+  from typing import Dict, Any, Optional
+  from datetime import datetime
+
+  from eva_matrix.schema.matrix_state import MatrixState
+  from eva_matrix.dimensions.dimensions import DimensionManager
+  from eva_matrix.stress.stress_tracker import StressTracker
+
+
+  class MatrixEngine:
+      """
+      EVA Matrix - Psychological State Engine.
+
+      Manages:
+      - 9D emotion dimensions
+      - Stress tracking
+      - State snapshots
+      - Emotion transitions
+      """
+
+      def __init__(self, bus=None):
+          """
+          Initialize Matrix Engine.
+
+          Args:
+              bus: Optional bus for publishing state
+          """
+          self._dimensions = DimensionManager()
+          self._stress = StressTracker()
+          self._bus = bus
+          self._last_state: Optional[MatrixState] = None
+
+      def get_state(self) -> MatrixState:
+          """
+          Get current psychological state.
+
+          Returns:
+              Current MatrixState
+          """
+          dim_values = self._dimensions.get_all()
+          state = MatrixState(
+              pleasure=dim_values["pleasure"],
+              arousal=dim_values["arousal"],
+              dominance=dim_values["dominance"],
+              openness=dim_values["openness"],
+              certainty=dim_values["certainty"],
+              anticipation=dim_values["anticipation"],
+              trust=dim_values["trust"],
+              interest=dim_values["interest"],
+              warmth=dim_values["warmth"],
+              stress_level=self._stress.level
+          )
+          self._last_state = state
+          return state
+
+      def process_stimulus(self, stimulus: Dict[str, float]) -> MatrixState:
+          """
+          Process emotional stimulus.
+
+          Args:
+              stimulus: Dict mapping dimension names to intensities
+
+          Returns:
+              New state after processing
+          """
+          # Apply stress modifier
+          modifier = self._stress.get_stress_modifier()
+
+          for dim, intensity in stimulus.items():
+              modified_intensity = intensity * modifier
+              self._dimensions.apply_stimulus(dim, modified_intensity)
+
+          # Check for stress-inducing stimuli
+          if stimulus.get("pleasure", 0) < -0.3:
+              self._stress.add_stress(abs(stimulus["pleasure"]) * 0.5, "negative_emotion")
+
+          state = self.get_state()
+          self._publish_state(state)
+          return state
+
+      def update(self, dt: float = 1.0) -> MatrixState:
+          """
+          Update with time passage (decay).
+
+          Args:
+              dt: Time delta in seconds
+
+          Returns:
+              State after update
+          """
+          self._dimensions.decay_all(dt)
+          self._stress.update(dt)
+
+          return self.get_state()
+
+      def set_state(self, state: MatrixState) -> None:
+          """
+          Set state directly (for loading saved state).
+
+          Args:
+              state: State to set
+          """
+          self._dimensions.set("pleasure", state.pleasure)
+          self._dimensions.set("arousal", state.arousal)
+          self._dimensions.set("dominance", state.dominance)
+          self._dimensions.set("openness", state.openness)
+          self._dimensions.set("certainty", state.certainty)
+          self._dimensions.set("anticipation", state.anticipation)
+          self._dimensions.set("trust", state.trust)
+          self._dimensions.set("interest", state.interest)
+          self._dimensions.set("warmth", state.warmth)
+
+      def apply_emotion(self, emotion: str, intensity: float = 0.5) -> MatrixState:
+          """
+          Apply a named emotion (maps to dimension vector).
+
+          Args:
+              emotion: Emotion name (joy, sadness, anger, etc.)
+              intensity: How strong (0.0 to 1.0)
+
+          Returns:
+              New state
+          """
+          # Emotion to dimension mappings
+          EMOTION_VECTORS = {
+              "joy": {"pleasure": 0.8, "arousal": 0.3, "warmth": 0.5},
+              "sadness": {"pleasure": -0.7, "arousal": -0.3, "warmth": -0.2},
+              "anger": {"pleasure": -0.5, "arousal": 0.7, "dominance": 0.3},
+              "fear": {"pleasure": -0.6, "arousal": 0.8, "dominance": -0.5, "certainty": -0.6},
+              "surprise": {"arousal": 0.6, "anticipation": -0.8},
+              "trust": {"trust": 0.7, "warmth": 0.4, "openness": 0.3},
+              "anticipation": {"anticipation": 0.7, "arousal": 0.3, "interest": 0.4},
+              "curiosity": {"interest": 0.8, "openness": 0.5, "arousal": 0.3},
+              "contentment": {"pleasure": 0.5, "arousal": -0.3, "certainty": 0.4}
+          }
+
+          vector = EMOTION_VECTORS.get(emotion, {})
+          scaled_vector = {k: v * intensity for k, v in vector.items()}
+
+          return self.process_stimulus(scaled_vector)
+
+      def _publish_state(self, state: MatrixState) -> None:
+          """Publish state to bus."""
+          if self._bus:
+              self._bus.publish("bus:psychological", state.to_dict())
+
+      def is_stressed(self) -> bool:
+          """Check if stress is elevated."""
+          return self._stress.level > 0.5
+
+      def is_burnout(self) -> bool:
+          """Check if in burnout state."""
+          return self._stress.is_burnout
+  ```
+
+acceptance_criteria:
+  - File at eva_matrix/matrix_engine.py
+  - Coordinates dimensions and stress
+  - process_stimulus() handles emotion vectors
+  - apply_emotion() for named emotions
+  - Publishes to bus:psychological
+
+depends_on: [P3-003, P3-004]
+blocks: [P3-006, P3-007]

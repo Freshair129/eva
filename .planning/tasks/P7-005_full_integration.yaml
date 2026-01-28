@@ -1,0 +1,183 @@
+# Task: Full System Integration
+id: P7-005
+phase: 7
+title: "Full system integration"
+status: pending
+priority: high
+estimated_lines: 200
+
+description: |
+  Create the main application that wires everything together.
+  Full EVA system startup and integration.
+
+output_file: "api/main.py"
+
+spec: |
+  ```python
+  """EVA Main Application - Full system integration."""
+
+  from fastapi import FastAPI
+  from fastapi.middleware.cors import CORSMiddleware
+  from contextlib import asynccontextmanager
+  from pathlib import Path
+
+  # Import all systems
+  from msp.msp_engine import MSPEngine
+  from orchestrator.orchestrator_engine import OrchestratorEngine
+  from orchestrator.cim.cim_engine import CIMEngine
+  from orchestrator.llm_bridge.mock_llm import MockLLM
+  from adapters.simple_bus import SimpleBus
+  from eva_matrix.matrix_engine import MatrixEngine
+  from physio_core.physio_engine import PhysioEngine
+  from perception.qualia.qualia_engine import QualiaEngine
+  from perception.rms.rms_engine import RMSEngine
+  from gks.gks_engine import GKSEngine
+
+  # Import routes
+  from api.routes import chat, state, memory
+
+  # Import integrations
+  from eva_matrix.bus_integration import wire_matrix_to_bus
+  from physio_core.integration import wire_physio_to_matrix
+  from perception.integration import wire_perception_to_states
+  from gks.integration import wire_gks_to_cim
+
+
+  # Global system instances
+  systems = {}
+
+
+  def create_system():
+      """Create and wire all system components."""
+      # Create bus first
+      bus = SimpleBus()
+
+      # Create engines
+      msp = MSPEngine(
+          storage_path=Path("memory/msp_store.json"),
+          chroma_path="memory/chroma"
+      )
+
+      matrix = MatrixEngine(bus=bus)
+      physio = PhysioEngine(bus=bus)
+      qualia = QualiaEngine(bus=bus)
+      rms = RMSEngine(qualia_engine=qualia)
+      gks = GKSEngine()
+
+      # Create CIM with identity
+      cim = CIMEngine(
+          system_identity="You are EVA, an Embodied Virtual Agent.",
+          max_memory_items=5
+      )
+      cim.set_msp(msp)
+      cim.set_bus(bus)
+
+      # Wire GKS knowledge to CIM
+      wire_gks_to_cim(cim, gks)
+
+      # Create orchestrator
+      llm = MockLLM(default_response="Hello! I am EVA.")
+      orchestrator = OrchestratorEngine(
+          llm_provider=llm,
+          cim=cim,
+          bus=bus,
+          msp=msp
+      )
+
+      # Wire integrations
+      wire_physio_to_matrix(physio, matrix, bus)
+      wire_perception_to_states(qualia, bus)
+
+      return {
+          "bus": bus,
+          "msp": msp,
+          "matrix": matrix,
+          "physio": physio,
+          "qualia": qualia,
+          "rms": rms,
+          "gks": gks,
+          "cim": cim,
+          "orchestrator": orchestrator
+      }
+
+
+  @asynccontextmanager
+  async def lifespan(app: FastAPI):
+      """Application lifespan - startup and shutdown."""
+      # Startup
+      print("Starting EVA system...")
+      global systems
+      systems = create_system()
+
+      # Set references for routes
+      chat.set_orchestrator(systems["orchestrator"])
+      state.set_engines(
+          matrix=systems["matrix"],
+          physio=systems["physio"],
+          qualia=systems["qualia"]
+      )
+      memory.set_msp(systems["msp"])
+
+      print("EVA system ready!")
+      yield
+
+      # Shutdown
+      print("Shutting down EVA system...")
+      systems["physio"].stop_circulation()
+      print("EVA system stopped.")
+
+
+  # Create FastAPI app
+  app = FastAPI(
+      title="EVA API",
+      description="Embodied Virtual Agent - Bio-inspired AI",
+      version="0.2.0",
+      lifespan=lifespan
+  )
+
+  # CORS
+  app.add_middleware(
+      CORSMiddleware,
+      allow_origins=["*"],
+      allow_credentials=True,
+      allow_methods=["*"],
+      allow_headers=["*"],
+  )
+
+  # Include routers
+  app.include_router(chat.router)
+  app.include_router(state.router)
+  app.include_router(memory.router)
+
+
+  @app.get("/")
+  async def root():
+      """Root endpoint - system info."""
+      return {
+          "name": "EVA",
+          "version": "0.2.0",
+          "status": "running",
+          "systems": list(systems.keys()) if systems else []
+      }
+
+
+  @app.get("/health")
+  async def health():
+      """Health check endpoint."""
+      return {"status": "healthy"}
+
+
+  if __name__ == "__main__":
+      import uvicorn
+      uvicorn.run(app, host="0.0.0.0", port=8000)
+  ```
+
+acceptance_criteria:
+  - File at api/main.py
+  - Creates and wires all systems
+  - FastAPI app with lifespan management
+  - Includes all route modules
+  - Can run with uvicorn
+
+depends_on: [P7-002, P7-003, P7-004]
+blocks: [P7-006, P7-007]

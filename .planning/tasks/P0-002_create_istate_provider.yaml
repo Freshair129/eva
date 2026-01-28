@@ -1,0 +1,78 @@
+# Task: Create IStateProvider Interface
+id: P0-002
+phase: 0
+title: "Create IStateProvider interface"
+status: done
+priority: high
+estimated_lines: 30
+
+# Description
+description: |
+  Create the IStateProvider interface (Port) that defines how
+  external systems (PhysioCore, EVA Matrix) provide state to MSP.
+
+  In Phase 1, mock implementations will be used.
+  In later phases, real systems will implement this interface.
+
+# Output
+output_file: "contracts/ports/i_state_provider.py"
+
+# Specification
+spec: |
+  ```python
+  from abc import ABC, abstractmethod
+  from typing import Dict, Any
+
+  class IStateProvider(ABC):
+      """
+      Port interface for systems that provide state snapshots.
+
+      Implementors:
+      - MockPhysioProvider (Phase 1)
+      - MockMatrixProvider (Phase 1)
+      - PhysioCore (Phase 4)
+      - EVAMatrix (Phase 3)
+      """
+
+      @abstractmethod
+      def get_current_state(self) -> Dict[str, Any]:
+          """
+          Returns current system state snapshot.
+
+          Returns:
+              Dict containing:
+              - timestamp: ISO format string
+              - state data specific to the system
+              - source: identifier string
+          """
+          pass
+
+      @abstractmethod
+      def get_state_type(self) -> str:
+          """
+          Returns the type of state this provider gives.
+
+          Returns:
+              One of: 'physical', 'psychological', 'phenomenological'
+          """
+          pass
+
+      @abstractmethod
+      def get_provider_id(self) -> str:
+          """
+          Returns unique identifier for this provider.
+          """
+          pass
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at contracts/ports/i_state_provider.py
+  - Class IStateProvider is defined with ABC
+  - All three methods are abstract
+  - Type hints are complete
+  - Docstrings explain purpose
+
+# Dependencies
+depends_on: []
+blocks: [P0-006]  # MockStateProvider needs this

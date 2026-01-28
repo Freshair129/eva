@@ -1,0 +1,173 @@
+# Task: Implement Cascade System
+id: P4-005
+phase: 4
+title: "Implement Cascade system"
+status: pending
+priority: medium
+estimated_lines: 120
+
+description: |
+  Implement hormone cascade system.
+  Handles complex multi-hormone responses to stimuli.
+
+output_file: "physio_core/endocrine/cascade.py"
+
+spec: |
+  ```python
+  """Cascade System - Complex hormone responses."""
+
+  from typing import Dict, List
+  from dataclasses import dataclass
+
+  from physio_core.endocrine.glands import EndocrineSystem
+
+
+  @dataclass
+  class CascadeStep:
+      """A single step in a cascade."""
+      hormone: str
+      intensity: float
+      delay: float = 0.0  # seconds
+
+
+  @dataclass
+  class CascadeDefinition:
+      """Definition of a hormone cascade."""
+      name: str
+      trigger: str
+      steps: List[CascadeStep]
+
+
+  # Predefined cascades
+  CASCADES = {
+      "stress_response": CascadeDefinition(
+          name="stress_response",
+          trigger="threat",
+          steps=[
+              CascadeStep("adrenaline", 0.8, 0.0),
+              CascadeStep("noradrenaline", 0.6, 0.5),
+              CascadeStep("cortisol", 0.7, 2.0),
+          ]
+      ),
+      "relaxation_response": CascadeDefinition(
+          name="relaxation_response",
+          trigger="safety",
+          steps=[
+              CascadeStep("gaba", 0.6, 0.0),
+              CascadeStep("serotonin", 0.5, 1.0),
+              CascadeStep("oxytocin", 0.4, 2.0),
+          ]
+      ),
+      "reward_response": CascadeDefinition(
+          name="reward_response",
+          trigger="reward",
+          steps=[
+              CascadeStep("dopamine", 0.7, 0.0),
+              CascadeStep("endorphin", 0.5, 1.0),
+              CascadeStep("serotonin", 0.3, 2.0),
+          ]
+      ),
+      "social_bonding": CascadeDefinition(
+          name="social_bonding",
+          trigger="connection",
+          steps=[
+              CascadeStep("oxytocin", 0.6, 0.0),
+              CascadeStep("dopamine", 0.4, 0.5),
+              CascadeStep("serotonin", 0.4, 1.0),
+          ]
+      ),
+      "fear_response": CascadeDefinition(
+          name="fear_response",
+          trigger="fear",
+          steps=[
+              CascadeStep("adrenaline", 0.9, 0.0),
+              CascadeStep("cortisol", 0.8, 0.5),
+              CascadeStep("noradrenaline", 0.7, 0.5),
+          ]
+      ),
+      "sleep_induction": CascadeDefinition(
+          name="sleep_induction",
+          trigger="fatigue",
+          steps=[
+              CascadeStep("melatonin", 0.7, 0.0),
+              CascadeStep("gaba", 0.5, 1.0),
+          ]
+      )
+  }
+
+
+  class CascadeManager:
+      """
+      Manages hormone cascades.
+
+      Applies complex multi-step responses to stimuli.
+      """
+
+      def __init__(self, endocrine: EndocrineSystem):
+          """
+          Initialize cascade manager.
+
+          Args:
+              endocrine: EndocrineSystem to affect
+          """
+          self._endocrine = endocrine
+          self._active_cascades: List[dict] = []
+
+      def trigger_cascade(self, cascade_name: str, intensity: float = 1.0) -> None:
+          """
+          Trigger a named cascade.
+
+          Args:
+              cascade_name: Name of cascade to trigger
+              intensity: Intensity multiplier (0-1)
+          """
+          cascade = CASCADES.get(cascade_name)
+          if not cascade:
+              return
+
+          # For simplicity, apply all steps immediately
+          # In production, would use delays
+          for step in cascade.steps:
+              scaled_intensity = step.intensity * intensity
+              self._endocrine.stimulate(step.hormone, scaled_intensity)
+
+      def trigger_by_emotion(self, emotion: str, intensity: float = 0.5) -> None:
+          """
+          Trigger cascade based on emotion name.
+
+          Args:
+              emotion: Emotion name
+              intensity: Emotion intensity
+          """
+          EMOTION_TO_CASCADE = {
+              "joy": "reward_response",
+              "fear": "fear_response",
+              "anger": "stress_response",
+              "sadness": None,  # Custom handling
+              "love": "social_bonding",
+              "calm": "relaxation_response",
+              "tired": "sleep_induction",
+          }
+
+          cascade_name = EMOTION_TO_CASCADE.get(emotion)
+          if cascade_name:
+              self.trigger_cascade(cascade_name, intensity)
+          elif emotion == "sadness":
+              # Sadness: reduce dopamine, serotonin
+              self._endocrine.inhibit("dopamine", intensity * 0.5)
+              self._endocrine.inhibit("serotonin", intensity * 0.4)
+              self._endocrine.stimulate("cortisol", intensity * 0.3)
+
+      def get_cascade_names(self) -> List[str]:
+          """Get all available cascade names."""
+          return list(CASCADES.keys())
+  ```
+
+acceptance_criteria:
+  - File at physio_core/endocrine/cascade.py
+  - Predefined cascades for common responses
+  - trigger_cascade() applies multi-step response
+  - trigger_by_emotion() maps emotions to cascades
+
+depends_on: [P4-004]
+blocks: [P4-009]

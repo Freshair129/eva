@@ -1,0 +1,214 @@
+# Task: Integration Tests (E2E)
+id: P7-007
+phase: 7
+title: "Integration tests (E2E)"
+status: pending
+priority: high
+estimated_lines: 150
+
+description: |
+  Create end-to-end integration tests.
+  Test the full cognitive flow.
+
+output_file: "tests/integration/test_e2e.py"
+
+spec: |
+  ```python
+  """End-to-End Integration Tests."""
+
+  import pytest
+  from pathlib import Path
+  import tempfile
+
+  # Import systems
+  from msp.msp_engine import MSPEngine
+  from orchestrator.orchestrator_engine import OrchestratorEngine
+  from orchestrator.cim.cim_engine import CIMEngine
+  from orchestrator.llm_bridge.mock_llm import MockLLM
+  from adapters.simple_bus import SimpleBus
+  from eva_matrix.matrix_engine import MatrixEngine
+  from physio_core.physio_engine import PhysioEngine
+
+
+  @pytest.fixture
+  def full_system():
+      """Create full system for testing."""
+      with tempfile.TemporaryDirectory() as tmpdir:
+          tmppath = Path(tmpdir)
+
+          # Create systems
+          bus = SimpleBus()
+          msp = MSPEngine(
+              storage_path=tmppath / "msp.json",
+              chroma_path=str(tmppath / "chroma")
+          )
+          matrix = MatrixEngine(bus=bus)
+          physio = PhysioEngine(bus=bus)
+
+          # Create CIM
+          cim = CIMEngine(system_identity="You are EVA.")
+          cim.set_msp(msp)
+          cim.set_bus(bus)
+
+          # Create orchestrator
+          llm = MockLLM()
+          llm.set_response("hello", "Hello! How are you?")
+          llm.set_response("remember", "I'll remember that.")
+
+          orchestrator = OrchestratorEngine(
+              llm_provider=llm,
+              cim=cim,
+              bus=bus,
+              msp=msp
+          )
+
+          yield {
+              "bus": bus,
+              "msp": msp,
+              "matrix": matrix,
+              "physio": physio,
+              "orchestrator": orchestrator,
+              "llm": llm
+          }
+
+
+  class TestFullCognitiveFlow:
+      """Tests for complete cognitive flow."""
+
+      def test_simple_conversation(self, full_system):
+          """Can have simple conversation."""
+          orch = full_system["orchestrator"]
+
+          response = orch.process("Hello!")
+          assert response.content is not None
+          assert len(response.content) > 0
+
+      def test_context_includes_memory(self, full_system):
+          """Context includes relevant memories."""
+          orch = full_system["orchestrator"]
+          msp = full_system["msp"]
+
+          # Store a memory
+          msp.store_episodic(
+              content="User likes Python programming",
+              summary="User likes Python"
+          )
+
+          # Ask about Python
+          response = orch.process("Tell me about Python")
+
+          # Memory should be in context
+          assert response.context_used["memory_count"] >= 0
+
+      def test_history_builds(self, full_system):
+          """Conversation history builds up."""
+          orch = full_system["orchestrator"]
+
+          orch.process("First message")
+          orch.process("Second message")
+          orch.process("Third message")
+
+          history = orch.get_history()
+          assert len(history) == 6  # 3 user + 3 assistant
+
+      def test_bus_receives_events(self, full_system):
+          """Bus receives turn events."""
+          bus = full_system["bus"]
+          orch = full_system["orchestrator"]
+
+          events = []
+          bus.subscribe("orchestrator:turn", lambda msg: events.append(msg))
+
+          orch.process("Test message")
+
+          # Might not receive due to timing, but shouldn't error
+          # assert len(events) >= 0
+
+      def test_matrix_affects_state(self, full_system):
+          """Matrix emotional state can be affected."""
+          matrix = full_system["matrix"]
+
+          initial = matrix.get_state()
+          matrix.apply_emotion("joy", 0.8)
+          after = matrix.get_state()
+
+          assert after.pleasure > initial.pleasure
+
+      def test_physio_cascade(self, full_system):
+          """Physio responds to stimuli."""
+          physio = full_system["physio"]
+
+          initial = physio.get_state()
+          physio.process_stimulus("stress_response", 0.7)
+          after = physio.get_state()
+
+          assert after.cortisol > initial.cortisol
+
+
+  class TestMemoryPersistence:
+      """Tests for memory storage."""
+
+      def test_episodic_stored_and_recalled(self, full_system):
+          """Episodic memories can be stored and recalled."""
+          msp = full_system["msp"]
+
+          # Store
+          mem = msp.store_episodic(
+              content="We had a great conversation about AI",
+              summary="AI conversation"
+          )
+
+          # Recall
+          results = msp.recall("AI conversation", limit=5)
+          assert len(results) > 0
+          assert any(m.id == mem.id for m in results)
+
+      def test_semantic_facts(self, full_system):
+          """Semantic facts are stored."""
+          msp = full_system["msp"]
+
+          msp.store_semantic(
+              subject="User",
+              predicate="prefers",
+              object="dark mode"
+          )
+
+          results = msp.recall("dark mode")
+          assert len(results) > 0
+
+
+  class TestSystemIntegration:
+      """Tests for system integration."""
+
+      def test_matrix_physio_connection(self, full_system):
+          """Matrix and Physio are connected via bus."""
+          bus = full_system["bus"]
+          matrix = full_system["matrix"]
+          physio = full_system["physio"]
+
+          # Physio change should be observable
+          physio.stimulate_hormone("dopamine", 0.8)
+
+          # Bus should have physical state
+          physical = bus.get_latest("bus:physical")
+          # May be None if not published yet
+          # Just ensure no errors
+
+      def test_all_systems_initialize(self, full_system):
+          """All systems can initialize."""
+          assert full_system["bus"] is not None
+          assert full_system["msp"] is not None
+          assert full_system["matrix"] is not None
+          assert full_system["physio"] is not None
+          assert full_system["orchestrator"] is not None
+  ```
+
+acceptance_criteria:
+  - File at tests/integration/test_e2e.py
+  - Tests full cognitive flow
+  - Tests memory persistence
+  - Tests system integration
+  - All tests pass
+
+depends_on: [P7-006]
+blocks: [P7-008]

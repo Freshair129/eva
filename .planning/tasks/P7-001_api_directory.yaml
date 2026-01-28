@@ -1,0 +1,41 @@
+# Task: Create API Directory
+id: P7-001
+phase: 7
+title: "Create API directory structure"
+status: pending
+priority: high
+estimated_lines: 10
+
+description: |
+  Create API directory for FastAPI endpoints.
+
+output_files:
+  - "api/__init__.py"
+  - "api/routes/__init__.py"
+  - "api/middleware/__init__.py"
+
+spec: |
+  ```
+  api/
+  ├── __init__.py
+  ├── main.py          # FastAPI app
+  ├── routes/
+  │   └── __init__.py
+  └── middleware/
+      └── __init__.py
+  ```
+
+  ## api/__init__.py
+  ```python
+  """
+  EVA API - HTTP interface for EVA system.
+  """
+  __version__ = "0.1.0"
+  ```
+
+acceptance_criteria:
+  - api/ directory exists
+  - All subdirectories created
+
+depends_on: []
+blocks: [P7-002]

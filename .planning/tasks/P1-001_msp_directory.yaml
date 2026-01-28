@@ -1,0 +1,58 @@
+# Task: Create MSP Directory Structure
+id: P1-001
+phase: 1
+title: "Create MSP directory structure"
+status: done
+priority: high
+estimated_lines: 10
+
+# Description
+description: |
+  Create the Memory & Soul Passport (MSP) directory structure.
+  This is the memory system that stores all types of memories:
+  - Episodic (autobiographical)
+  - Semantic (facts)
+  - Sensory (qualia)
+
+# Output Files
+output_files:
+  - "msp/__init__.py"
+  - "msp/schema/__init__.py"
+  - "msp/storage/__init__.py"
+  - "msp/tests/__init__.py"
+
+# Specification
+spec: |
+  Create directory structure:
+  ```
+  msp/
+  ├── __init__.py           # Package init with version
+  ├── schema/
+  │   └── __init__.py
+  ├── storage/
+  │   └── __init__.py
+  └── tests/
+      └── __init__.py
+  ```
+
+  ## msp/__init__.py
+  ```python
+  """
+  Memory & Soul Passport (MSP)
+
+  The unified memory system for EVA.
+  Handles episodic, semantic, and sensory memories.
+  """
+
+  __version__ = "0.1.0"
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - msp/ directory exists
+  - All __init__.py files created
+  - Package is importable
+
+# Dependencies
+depends_on: []
+blocks: [P1-002, P1-003, P1-004]

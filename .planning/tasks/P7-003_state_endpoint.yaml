@@ -1,0 +1,99 @@
+# Task: Implement State Endpoint
+id: P7-003
+phase: 7
+title: "Implement State endpoint"
+status: pending
+priority: medium
+estimated_lines: 60
+
+description: |
+  Implement state inspection endpoint.
+  View current psychological and physical state.
+
+output_file: "api/routes/state.py"
+
+spec: |
+  ```python
+  """State Endpoint - System state inspection."""
+
+  from fastapi import APIRouter
+  from typing import Dict, Any, Optional
+
+  router = APIRouter(prefix="/state", tags=["state"])
+
+  # Global references
+  _matrix_engine = None
+  _physio_engine = None
+  _qualia_engine = None
+
+
+  def set_engines(matrix=None, physio=None, qualia=None) -> None:
+      """Set engine references."""
+      global _matrix_engine, _physio_engine, _qualia_engine
+      _matrix_engine = matrix
+      _physio_engine = physio
+      _qualia_engine = qualia
+
+
+  @router.get("/")
+  async def get_full_state() -> Dict[str, Any]:
+      """Get complete system state."""
+      return {
+          "psychological": await get_psychological(),
+          "physical": await get_physical(),
+          "phenomenological": await get_qualia()
+      }
+
+
+  @router.get("/psychological")
+  async def get_psychological() -> Dict[str, Any]:
+      """Get psychological (EVA Matrix) state."""
+      if _matrix_engine is None:
+          return {"status": "not_initialized"}
+
+      state = _matrix_engine.get_state()
+      return {
+          "state": state.to_dict(),
+          "dominant_emotion": state.get_dominant_emotion(),
+          "is_stressed": _matrix_engine.is_stressed()
+      }
+
+
+  @router.get("/physical")
+  async def get_physical() -> Dict[str, Any]:
+      """Get physical (PhysioCore) state."""
+      if _physio_engine is None:
+          return {"status": "not_initialized"}
+
+      state = _physio_engine.get_state()
+      return {
+          "hormones": state.get_all_hormones(),
+          "vitals": _physio_engine.get_vitals(),
+          "is_stressed": _physio_engine.is_stressed()
+      }
+
+
+  @router.get("/qualia")
+  async def get_qualia() -> Dict[str, Any]:
+      """Get phenomenological (Qualia) state."""
+      if _qualia_engine is None:
+          return {"status": "not_initialized"}
+
+      state = _qualia_engine.get_current_state()
+      if state is None:
+          return {"status": "no_experience"}
+
+      return {
+          "qualia": state.to_dict(),
+          "description": _qualia_engine.describe_experience(state)
+      }
+  ```
+
+acceptance_criteria:
+  - File at api/routes/state.py
+  - GET /state for full state
+  - Separate endpoints for psych/physio/qualia
+  - Graceful handling when engines not set
+
+depends_on: [P7-002]
+blocks: [P7-005]

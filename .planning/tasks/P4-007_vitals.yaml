@@ -1,0 +1,129 @@
+# Task: Implement Vital Signs
+id: P4-007
+phase: 4
+title: "Implement Vital signs"
+status: pending
+priority: medium
+estimated_lines: 80
+
+description: |
+  Implement vital signs tracking.
+  Heart rate, breathing, temperature respond to hormones.
+
+output_file: "physio_core/vitals/vital_signs.py"
+
+spec: |
+  ```python
+  """Vital Signs - Physiological measurements."""
+
+  from dataclasses import dataclass
+  from typing import Dict
+
+
+  @dataclass
+  class VitalsState:
+      """Current vital sign readings."""
+      heart_rate: float = 70.0       # BPM (60-100 normal)
+      breathing_rate: float = 16.0   # per minute (12-20 normal)
+      temperature: float = 37.0      # Celsius (36.5-37.5 normal)
+
+      def to_dict(self) -> Dict[str, float]:
+          return {
+              "heart_rate": self.heart_rate,
+              "breathing_rate": self.breathing_rate,
+              "temperature": self.temperature
+          }
+
+
+  class VitalsTracker:
+      """
+      Tracks vital signs and responds to hormones.
+
+      Hormone effects on vitals:
+      - Adrenaline: ↑ heart rate, ↑ breathing
+      - Cortisol: ↑ heart rate
+      - GABA: ↓ heart rate, ↓ breathing
+      - Melatonin: ↓ heart rate
+      """
+
+      # Baseline values
+      BASELINE_HR = 70.0
+      BASELINE_BR = 16.0
+      BASELINE_TEMP = 37.0
+
+      def __init__(self):
+          self._heart_rate = self.BASELINE_HR
+          self._breathing_rate = self.BASELINE_BR
+          self._temperature = self.BASELINE_TEMP
+
+      def get_state(self) -> VitalsState:
+          """Get current vitals."""
+          return VitalsState(
+              heart_rate=self._heart_rate,
+              breathing_rate=self._breathing_rate,
+              temperature=self._temperature
+          )
+
+      def update_from_hormones(self, hormones: Dict[str, float]) -> VitalsState:
+          """
+          Update vitals based on hormone levels.
+
+          Args:
+              hormones: Dict of hormone name to level (0-1)
+
+          Returns:
+              Updated vitals state
+          """
+          # Start from baseline
+          hr = self.BASELINE_HR
+          br = self.BASELINE_BR
+          temp = self.BASELINE_TEMP
+
+          # Adrenaline: strong effect on HR and BR
+          adrenaline = hormones.get("adrenaline", 0.2)
+          hr += (adrenaline - 0.2) * 60  # Can add up to 48 BPM
+          br += (adrenaline - 0.2) * 10  # Can add up to 8 breaths
+
+          # Noradrenaline: moderate HR effect
+          noradrenaline = hormones.get("noradrenaline", 0.3)
+          hr += (noradrenaline - 0.3) * 30
+
+          # Cortisol: moderate HR effect
+          cortisol = hormones.get("cortisol", 0.3)
+          hr += (cortisol - 0.3) * 20
+
+          # GABA: calming effect
+          gaba = hormones.get("gaba", 0.5)
+          hr -= (gaba - 0.5) * 15
+          br -= (gaba - 0.5) * 4
+
+          # Melatonin: reduces HR (sleep)
+          melatonin = hormones.get("melatonin", 0.3)
+          hr -= (melatonin - 0.3) * 20
+
+          # Temperature: affected by metabolic hormones
+          testosterone = hormones.get("testosterone", 0.5)
+          temp += (testosterone - 0.5) * 0.5
+
+          # Clamp to reasonable ranges
+          self._heart_rate = max(40, min(180, hr))
+          self._breathing_rate = max(8, min(40, br))
+          self._temperature = max(35.0, min(40.0, temp))
+
+          return self.get_state()
+
+      def reset(self) -> None:
+          """Reset to baseline."""
+          self._heart_rate = self.BASELINE_HR
+          self._breathing_rate = self.BASELINE_BR
+          self._temperature = self.BASELINE_TEMP
+  ```
+
+acceptance_criteria:
+  - File at physio_core/vitals/vital_signs.py
+  - VitalsTracker with HR, BR, Temp
+  - update_from_hormones() calculates effects
+  - Values clamped to safe ranges
+
+depends_on: [P4-006]
+blocks: [P4-009]

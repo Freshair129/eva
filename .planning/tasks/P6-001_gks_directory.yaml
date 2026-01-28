@@ -1,0 +1,45 @@
+# Task: Create GKS Directory
+id: P6-001
+phase: 6
+title: "Create GKS directory structure"
+status: pending
+priority: high
+estimated_lines: 10
+
+description: |
+  Create Genesis Knowledge System directory.
+
+output_files:
+  - "gks/__init__.py"
+  - "gks/blocks/__init__.py"
+  - "gks/loader/__init__.py"
+  - "gks/tests/__init__.py"
+
+spec: |
+  ```
+  gks/
+  ├── __init__.py
+  ├── blocks/
+  │   └── __init__.py
+  ├── loader/
+  │   └── __init__.py
+  └── tests/
+      └── __init__.py
+  ```
+
+  ## gks/__init__.py
+  ```python
+  """
+  Genesis Knowledge System (GKS)
+
+  Innate knowledge blocks - read-only wisdom.
+  """
+  __version__ = "0.1.0"
+  ```
+
+acceptance_criteria:
+  - gks/ directory exists
+  - All subdirectories created
+
+depends_on: []
+blocks: [P6-002, P6-003]

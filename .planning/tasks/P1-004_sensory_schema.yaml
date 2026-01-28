@@ -1,0 +1,97 @@
+# Task: Define SensoryMemory Schema
+id: P1-004
+phase: 1
+title: "Define SensoryMemory schema"
+status: pending
+priority: high
+estimated_lines: 40
+
+# Description
+description: |
+  Define the SensoryMemory dataclass for qualia/sensory memories.
+  These are the "feeling" aspects of memories - textures, colors,
+  sounds associated with experiences.
+
+# Output
+output_file: "msp/schema/sensory.py"
+
+# Specification
+spec: |
+  ```python
+  """Sensory Memory Schema - Qualia memories."""
+
+  from dataclasses import dataclass, field
+  from datetime import datetime
+  from typing import Optional, List, Dict, Any
+  from uuid import uuid4
+
+
+  @dataclass
+  class SensoryMemory:
+      """
+      Represents sensory/qualia aspects of memory.
+
+      Sensory memories are "how it felt" memories:
+      - Textures (rough, smooth, warm)
+      - Colors (associated visual impressions)
+      - Sounds (tone, rhythm, music)
+
+      These attach to episodic memories to enrich recall.
+
+      Attributes:
+          id: Unique identifier
+          linked_episodic_id: ID of the episodic memory this enriches
+          texture: Texture qualities (roughness, temperature, etc.)
+          color: Color impressions (hue, saturation, brightness)
+          soundscape: Sound qualities (tone, rhythm, volume)
+          intensity: Overall sensory intensity (0.0-1.0)
+          timestamp: When this sensory impression was formed
+      """
+
+      linked_episodic_id: str
+
+      id: str = field(default_factory=lambda: f"sen_{uuid4().hex[:8]}")
+      texture: Dict[str, float] = field(default_factory=dict)
+      color: Dict[str, float] = field(default_factory=dict)
+      soundscape: Dict[str, float] = field(default_factory=dict)
+      intensity: float = 0.5
+      timestamp: datetime = field(default_factory=datetime.now)
+
+      def to_dict(self) -> Dict[str, Any]:
+          """Convert to dictionary for storage."""
+          return {
+              "id": self.id,
+              "linked_episodic_id": self.linked_episodic_id,
+              "texture": self.texture,
+              "color": self.color,
+              "soundscape": self.soundscape,
+              "intensity": self.intensity,
+              "timestamp": self.timestamp.isoformat(),
+              "type": "sensory"
+          }
+
+      @classmethod
+      def from_dict(cls, data: Dict[str, Any]) -> "SensoryMemory":
+          """Create from dictionary."""
+          return cls(
+              id=data["id"],
+              linked_episodic_id=data["linked_episodic_id"],
+              texture=data.get("texture", {}),
+              color=data.get("color", {}),
+              soundscape=data.get("soundscape", {}),
+              intensity=data.get("intensity", 0.5),
+              timestamp=datetime.fromisoformat(data["timestamp"])
+          )
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at msp/schema/sensory.py
+  - SensoryMemory dataclass defined
+  - Links to episodic memory via linked_episodic_id
+  - Texture, color, soundscape dicts for qualia
+  - to_dict() and from_dict() methods work
+
+# Dependencies
+depends_on: [P1-001]
+blocks: [P1-005]

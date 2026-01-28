@@ -1,0 +1,80 @@
+# Task: Consciousness/Memory Setup
+id: P7-006
+phase: 7
+title: "Consciousness/Memory directory setup"
+status: pending
+priority: high
+estimated_lines: 100
+
+description: |
+  Setup consciousness (runtime) and memory (persistent) directories.
+  Create initial structure for data storage.
+
+output_files:
+  - "consciousness/__init__.py"
+  - "consciousness/context_container/.gitkeep"
+  - "consciousness/episodic_memory/.gitkeep"
+  - "consciousness/state_memory/.gitkeep"
+  - "memory/__init__.py"
+  - "memory/session_memory/.gitkeep"
+  - "memory/core_memory/.gitkeep"
+  - "memory/sphere_memory/.gitkeep"
+
+spec: |
+  Create directory structure:
+
+  ```
+  consciousness/           # Runtime state (RAM)
+  ├── __init__.py
+  ├── context_container/   # Active turn files
+  ├── episodic_memory/     # Conversation logs
+  └── state_memory/        # Current snapshots
+
+  memory/                  # Persistent storage
+  ├── __init__.py
+  ├── session_memory/      # Session snapshots
+  ├── core_memory/         # Distilled facts
+  ├── sphere_memory/       # Domain knowledge
+  └── user_registry.json   # User profiles
+  ```
+
+  ## consciousness/__init__.py
+  ```python
+  """
+  Consciousness - Direct Access RAM
+
+  Runtime state accessible by LLM.
+  Cleared between sessions.
+  """
+  ```
+
+  ## memory/__init__.py
+  ```python
+  """
+  Memory - Persistent Subconscious
+
+  Long-term storage managed by MSP.
+  LLM cannot write directly here.
+  """
+  ```
+
+  ## memory/user_registry.json
+  ```json
+  {
+    "users": {},
+    "default_user": {
+      "id": "default",
+      "name": "User",
+      "preferences": {}
+    }
+  }
+  ```
+
+acceptance_criteria:
+  - All directories created
+  - __init__.py files present
+  - user_registry.json with default structure
+  - .gitkeep files for empty directories
+
+depends_on: [P7-005]
+blocks: [P7-007]

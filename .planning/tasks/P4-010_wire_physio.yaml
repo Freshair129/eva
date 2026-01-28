@@ -1,0 +1,122 @@
+# Task: Wire Physio to Matrix and Bus
+id: P4-010
+phase: 4
+title: "Wire Physio ↔ Matrix ↔ Bus"
+status: pending
+priority: high
+estimated_lines: 60
+
+description: |
+  Create integration between PhysioCore, EVA Matrix, and Bus.
+  Physical state affects psychological state.
+
+output_file: "physio_core/integration.py"
+
+spec: |
+  ```python
+  """PhysioCore Integration - Wiring to other systems."""
+
+  from typing import Optional
+  from contracts.ports.i_bus import IBus
+  from contracts.ports.i_state_provider import IStateProvider
+  from physio_core.physio_engine import PhysioEngine
+
+
+  class PhysioProvider(IStateProvider):
+      """
+      Adapter exposing PhysioEngine as IStateProvider.
+      """
+
+      def __init__(self, engine: PhysioEngine = None):
+          self._engine = engine or PhysioEngine()
+
+      @property
+      def engine(self) -> PhysioEngine:
+          return self._engine
+
+      def get_current_state(self):
+          state = self._engine.get_state()
+          return {
+              "timestamp": state.timestamp.isoformat(),
+              "hormones": state.get_all_hormones(),
+              "vitals": {
+                  "heart_rate": state.heart_rate,
+                  "breathing_rate": state.breathing_rate,
+                  "temperature": state.temperature
+              },
+              "is_stressed": self._engine.is_stressed(),
+              "source": self.get_provider_id()
+          }
+
+      def get_state_type(self) -> str:
+          return "physical"
+
+      def get_provider_id(self) -> str:
+          return "physio_core"
+
+
+  def create_physio_with_bus(bus: IBus) -> PhysioEngine:
+      """Factory to create PhysioEngine wired to bus."""
+      return PhysioEngine(bus=bus)
+
+
+  def wire_physio_to_matrix(physio: PhysioEngine, matrix_engine, bus: IBus) -> None:
+      """
+      Wire PhysioCore to affect EVA Matrix.
+
+      Physical state changes trigger psychological responses.
+      """
+      def on_physio_change(data):
+          hormones = data.get("hormones", {})
+
+          # Map hormones to emotion effects
+          stimulus = {}
+
+          # High dopamine → pleasure
+          dopamine = hormones.get("dopamine", 0.5)
+          if dopamine > 0.6:
+              stimulus["pleasure"] = (dopamine - 0.5) * 0.5
+
+          # High cortisol → negative pleasure, arousal
+          cortisol = hormones.get("cortisol", 0.3)
+          if cortisol > 0.5:
+              stimulus["pleasure"] = stimulus.get("pleasure", 0) - (cortisol - 0.3) * 0.5
+              stimulus["arousal"] = (cortisol - 0.3) * 0.4
+
+          # High adrenaline → arousal, dominance
+          adrenaline = hormones.get("adrenaline", 0.2)
+          if adrenaline > 0.4:
+              stimulus["arousal"] = stimulus.get("arousal", 0) + (adrenaline - 0.2) * 0.6
+              stimulus["dominance"] = (adrenaline - 0.2) * 0.3
+
+          # High oxytocin → warmth, trust
+          oxytocin = hormones.get("oxytocin", 0.5)
+          if oxytocin > 0.6:
+              stimulus["warmth"] = (oxytocin - 0.5) * 0.6
+              stimulus["trust"] = (oxytocin - 0.5) * 0.4
+
+          # High serotonin → contentment (moderate pleasure, low arousal)
+          serotonin = hormones.get("serotonin", 0.5)
+          if serotonin > 0.6:
+              stimulus["pleasure"] = stimulus.get("pleasure", 0) + (serotonin - 0.5) * 0.3
+              stimulus["arousal"] = stimulus.get("arousal", 0) - (serotonin - 0.5) * 0.2
+
+          # High GABA → calm (negative arousal)
+          gaba = hormones.get("gaba", 0.5)
+          if gaba > 0.6:
+              stimulus["arousal"] = stimulus.get("arousal", 0) - (gaba - 0.5) * 0.4
+
+          if stimulus:
+              matrix_engine.process_stimulus(stimulus)
+
+      bus.subscribe("bus:physical", on_physio_change)
+  ```
+
+acceptance_criteria:
+  - File at physio_core/integration.py
+  - PhysioProvider implements IStateProvider
+  - wire_physio_to_matrix() connects systems
+  - Hormone changes affect Matrix emotions
+
+depends_on: [P4-009, P3-007]
+blocks: []

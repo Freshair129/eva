@@ -1,0 +1,151 @@
+# Task: Define MatrixState Schema
+id: P3-002
+phase: 3
+title: "Define MatrixState schema"
+status: pending
+priority: high
+estimated_lines: 80
+
+description: |
+  Define the MatrixState dataclass for psychological state.
+  This represents the 9D emotional space:
+  1. Pleasure-Pain
+  2. Arousal (Calm-Excited)
+  3. Dominance (Submissive-Dominant)
+  4. Openness (Closed-Open)
+  5. Certainty (Uncertain-Certain)
+  6. Anticipation (Surprised-Anticipating)
+  7. Trust (Distrust-Trust)
+  8. Interest (Bored-Interested)
+  9. Warmth (Cold-Warm)
+
+output_file: "eva_matrix/schema/matrix_state.py"
+
+spec: |
+  ```python
+  """MatrixState Schema - 9D psychological state."""
+
+  from dataclasses import dataclass, field
+  from datetime import datetime
+  from typing import Dict, Any, Optional
+
+
+  @dataclass
+  class EmotionDimension:
+      """A single emotion dimension."""
+      name: str
+      value: float  # -1.0 to 1.0
+      negative_pole: str
+      positive_pole: str
+
+      def __post_init__(self):
+          self.value = max(-1.0, min(1.0, self.value))
+
+
+  @dataclass
+  class MatrixState:
+      """
+      9-dimensional psychological state.
+
+      Each dimension is a bipolar scale from -1.0 to 1.0.
+      """
+
+      # Core dimensions (PAD model extended)
+      pleasure: float = 0.0       # Pain (-1) to Pleasure (+1)
+      arousal: float = 0.0        # Calm (-1) to Excited (+1)
+      dominance: float = 0.0      # Submissive (-1) to Dominant (+1)
+
+      # Extended dimensions
+      openness: float = 0.0       # Closed (-1) to Open (+1)
+      certainty: float = 0.0      # Uncertain (-1) to Certain (+1)
+      anticipation: float = 0.0   # Surprised (-1) to Anticipating (+1)
+      trust: float = 0.0          # Distrust (-1) to Trust (+1)
+      interest: float = 0.0       # Bored (-1) to Interested (+1)
+      warmth: float = 0.0         # Cold (-1) to Warm (+1)
+
+      # Meta
+      timestamp: datetime = field(default_factory=datetime.now)
+      stress_level: float = 0.0   # 0.0 to 1.0
+
+      def __post_init__(self):
+          """Clamp all values to valid ranges."""
+          self.pleasure = self._clamp(self.pleasure)
+          self.arousal = self._clamp(self.arousal)
+          self.dominance = self._clamp(self.dominance)
+          self.openness = self._clamp(self.openness)
+          self.certainty = self._clamp(self.certainty)
+          self.anticipation = self._clamp(self.anticipation)
+          self.trust = self._clamp(self.trust)
+          self.interest = self._clamp(self.interest)
+          self.warmth = self._clamp(self.warmth)
+          self.stress_level = max(0.0, min(1.0, self.stress_level))
+
+      @staticmethod
+      def _clamp(value: float) -> float:
+          return max(-1.0, min(1.0, value))
+
+      def get_dimension(self, name: str) -> Optional[float]:
+          """Get value of dimension by name."""
+          return getattr(self, name, None)
+
+      def set_dimension(self, name: str, value: float) -> None:
+          """Set value of dimension by name."""
+          if hasattr(self, name):
+              setattr(self, name, self._clamp(value))
+
+      def to_dict(self) -> Dict[str, Any]:
+          """Convert to dictionary."""
+          return {
+              "pleasure": self.pleasure,
+              "arousal": self.arousal,
+              "dominance": self.dominance,
+              "openness": self.openness,
+              "certainty": self.certainty,
+              "anticipation": self.anticipation,
+              "trust": self.trust,
+              "interest": self.interest,
+              "warmth": self.warmth,
+              "stress_level": self.stress_level,
+              "timestamp": self.timestamp.isoformat()
+          }
+
+      @classmethod
+      def from_dict(cls, data: Dict[str, Any]) -> "MatrixState":
+          """Create from dictionary."""
+          return cls(
+              pleasure=data.get("pleasure", 0.0),
+              arousal=data.get("arousal", 0.0),
+              dominance=data.get("dominance", 0.0),
+              openness=data.get("openness", 0.0),
+              certainty=data.get("certainty", 0.0),
+              anticipation=data.get("anticipation", 0.0),
+              trust=data.get("trust", 0.0),
+              interest=data.get("interest", 0.0),
+              warmth=data.get("warmth", 0.0),
+              stress_level=data.get("stress_level", 0.0)
+          )
+
+      def get_dominant_emotion(self) -> str:
+          """Get the most dominant dimension."""
+          dims = {
+              "pleasure": abs(self.pleasure),
+              "arousal": abs(self.arousal),
+              "dominance": abs(self.dominance),
+              "openness": abs(self.openness),
+              "certainty": abs(self.certainty),
+              "anticipation": abs(self.anticipation),
+              "trust": abs(self.trust),
+              "interest": abs(self.interest),
+              "warmth": abs(self.warmth)
+          }
+          return max(dims, key=dims.get)
+  ```
+
+acceptance_criteria:
+  - File at eva_matrix/schema/matrix_state.py
+  - MatrixState with 9 dimensions + stress
+  - Values clamped to valid ranges
+  - to_dict() and from_dict() work
+
+depends_on: [P3-001]
+blocks: [P3-003, P3-004, P3-005]

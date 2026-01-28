@@ -1,0 +1,87 @@
+# Task: Implement Soundscape Qualities
+id: P5-005
+phase: 5
+title: "Implement Soundscape qualities"
+status: pending
+priority: medium
+estimated_lines: 60
+
+description: |
+  Implement soundscape quality calculations.
+  Map emotions to sounds.
+
+output_file: "perception/qualia/soundscape.py"
+
+spec: |
+  ```python
+  """Soundscape Qualities - Auditory impressions."""
+
+  from typing import Dict
+  from perception.schema.qualia_state import SoundscapeQualia
+
+
+  class SoundscapeGenerator:
+      """
+      Generates soundscape qualities from state.
+
+      Maps:
+      - High arousal → fast rhythm, loud
+      - Positive emotions → harmonious
+      - Stress → dissonant, high pitch
+      """
+
+      def generate(self, psych_state: Dict[str, float],
+                   physio_state: Dict[str, float] = None) -> SoundscapeQualia:
+          """
+          Generate soundscape from state.
+
+          Args:
+              psych_state: Psychological state
+              physio_state: Optional physical state
+
+          Returns:
+              SoundscapeQualia
+          """
+          pleasure = psych_state.get("pleasure", 0)
+          arousal = psych_state.get("arousal", 0)
+          stress = psych_state.get("stress_level", 0)
+
+          # Pitch: stress and arousal raise pitch
+          pitch = 0.5 + arousal * 0.2 + stress * 0.2
+          pitch = max(0, min(1, pitch))
+
+          # Volume: arousal increases volume
+          volume = 0.5 + arousal * 0.3
+          if physio_state:
+              # Heart rate affects perceived volume
+              hr = physio_state.get("heart_rate", 70)
+              volume += (hr - 70) / 200
+          volume = max(0.1, min(1, volume))
+
+          # Rhythm: arousal speeds up, calm slows down
+          rhythm = 0.5 + arousal * 0.3
+          if physio_state:
+              # Breathing rate affects rhythm
+              br = physio_state.get("breathing_rate", 16)
+              rhythm += (br - 16) / 40
+          rhythm = max(0.1, min(1, rhythm))
+
+          # Harmony: pleasure creates harmony, stress creates dissonance
+          harmony = 0.5 + pleasure * 0.3 - stress * 0.3
+          harmony = max(0, min(1, harmony))
+
+          return SoundscapeQualia(
+              pitch=pitch,
+              volume=volume,
+              rhythm=rhythm,
+              harmony=harmony
+          )
+  ```
+
+acceptance_criteria:
+  - File at perception/qualia/soundscape.py
+  - SoundscapeGenerator maps state to sounds
+  - Uses both psych and physio state
+
+depends_on: [P5-002]
+blocks: [P5-006]

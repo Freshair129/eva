@@ -1,0 +1,231 @@
+# Task: Implement MemoryStore
+id: P1-005
+phase: 1
+title: "Implement MemoryStore (IMemoryStorage)"
+status: pending
+priority: high
+estimated_lines: 120
+
+# Description
+description: |
+  Implement MemoryStore that implements IMemoryStorage interface.
+  This is the core storage adapter that handles all memory types.
+
+  For Phase 1, uses in-memory storage (dict).
+  ChromaDB integration comes in P1-006.
+
+# Output
+output_file: "msp/storage/memory_store.py"
+
+# Specification
+spec: |
+  ```python
+  """Memory Store - Core storage implementation."""
+
+  from typing import Dict, List, Any, Optional, Union
+  from datetime import datetime
+  import json
+  from pathlib import Path
+
+  from contracts.ports.i_memory_storage import IMemoryStorage
+  from msp.schema.episodic import EpisodicMemory
+  from msp.schema.semantic import SemanticMemory
+  from msp.schema.sensory import SensoryMemory
+
+
+  MemoryType = Union[EpisodicMemory, SemanticMemory, SensoryMemory]
+
+
+  class MemoryStore(IMemoryStorage):
+      """
+      In-memory implementation of IMemoryStorage.
+
+      Stores memories in dictionaries organized by type.
+      Supports persistence to JSON files.
+
+      Attributes:
+          _episodic: Dict of episodic memories
+          _semantic: Dict of semantic memories
+          _sensory: Dict of sensory memories
+          _persistence_path: Optional path for JSON persistence
+      """
+
+      def __init__(self, persistence_path: Optional[Path] = None):
+          """
+          Initialize memory store.
+
+          Args:
+              persistence_path: Optional path to persist memories as JSON
+          """
+          self._episodic: Dict[str, EpisodicMemory] = {}
+          self._semantic: Dict[str, SemanticMemory] = {}
+          self._sensory: Dict[str, SensoryMemory] = {}
+          self._persistence_path = persistence_path
+
+          if persistence_path and persistence_path.exists():
+              self._load_from_file()
+
+      def store(self, memory: MemoryType) -> str:
+          """
+          Store a memory and return its ID.
+
+          Args:
+              memory: Memory object to store
+
+          Returns:
+              The memory's ID
+          """
+          if isinstance(memory, EpisodicMemory):
+              self._episodic[memory.id] = memory
+          elif isinstance(memory, SemanticMemory):
+              self._semantic[memory.id] = memory
+          elif isinstance(memory, SensoryMemory):
+              self._sensory[memory.id] = memory
+          else:
+              raise ValueError(f"Unknown memory type: {type(memory)}")
+
+          self._persist()
+          return memory.id
+
+      def retrieve(self, memory_id: str) -> Optional[MemoryType]:
+          """
+          Retrieve a memory by ID.
+
+          Args:
+              memory_id: The ID to look up
+
+          Returns:
+              Memory object or None if not found
+          """
+          # Check all stores
+          if memory_id in self._episodic:
+              return self._episodic[memory_id]
+          if memory_id in self._semantic:
+              return self._semantic[memory_id]
+          if memory_id in self._sensory:
+              return self._sensory[memory_id]
+          return None
+
+      def delete(self, memory_id: str) -> bool:
+          """
+          Delete a memory by ID.
+
+          Args:
+              memory_id: The ID to delete
+
+          Returns:
+              True if deleted, False if not found
+          """
+          if memory_id in self._episodic:
+              del self._episodic[memory_id]
+              self._persist()
+              return True
+          if memory_id in self._semantic:
+              del self._semantic[memory_id]
+              self._persist()
+              return True
+          if memory_id in self._sensory:
+              del self._sensory[memory_id]
+              self._persist()
+              return True
+          return False
+
+      def list_by_type(self, memory_type: str) -> List[MemoryType]:
+          """
+          List all memories of a given type.
+
+          Args:
+              memory_type: One of 'episodic', 'semantic', 'sensory'
+
+          Returns:
+              List of memory objects
+          """
+          if memory_type == "episodic":
+              return list(self._episodic.values())
+          elif memory_type == "semantic":
+              return list(self._semantic.values())
+          elif memory_type == "sensory":
+              return list(self._sensory.values())
+          else:
+              return []
+
+      def search(self, query: str, limit: int = 10) -> List[MemoryType]:
+          """
+          Simple text search across all memories.
+
+          For Phase 1, this is a basic substring search.
+          ChromaBridge will provide semantic search.
+
+          Args:
+              query: Search query string
+              limit: Max results to return
+
+          Returns:
+              List of matching memories
+          """
+          results = []
+          query_lower = query.lower()
+
+          # Search episodic
+          for mem in self._episodic.values():
+              if query_lower in mem.content.lower() or query_lower in mem.summary.lower():
+                  results.append(mem)
+
+          # Search semantic
+          for mem in self._semantic.values():
+              if query_lower in mem.as_triple().lower():
+                  results.append(mem)
+
+          return results[:limit]
+
+      def _persist(self) -> None:
+          """Persist to JSON file if path is set."""
+          if not self._persistence_path:
+              return
+
+          data = {
+              "episodic": [m.to_dict() for m in self._episodic.values()],
+              "semantic": [m.to_dict() for m in self._semantic.values()],
+              "sensory": [m.to_dict() for m in self._sensory.values()]
+          }
+
+          self._persistence_path.parent.mkdir(parents=True, exist_ok=True)
+          with open(self._persistence_path, 'w') as f:
+              json.dump(data, f, indent=2)
+
+      def _load_from_file(self) -> None:
+          """Load memories from JSON file."""
+          with open(self._persistence_path, 'r') as f:
+              data = json.load(f)
+
+          for mem_data in data.get("episodic", []):
+              mem = EpisodicMemory.from_dict(mem_data)
+              self._episodic[mem.id] = mem
+
+          for mem_data in data.get("semantic", []):
+              mem = SemanticMemory.from_dict(mem_data)
+              self._semantic[mem.id] = mem
+
+          for mem_data in data.get("sensory", []):
+              mem = SensoryMemory.from_dict(mem_data)
+              self._sensory[mem.id] = mem
+
+      def clear(self) -> None:
+          """Clear all memories (for testing)."""
+          self._episodic.clear()
+          self._semantic.clear()
+          self._sensory.clear()
+          self._persist()
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at msp/storage/memory_store.py
+  - MemoryStore implements IMemoryStorage
+  - Can store/retrieve all 3 memory types
+  - JSON persistence works
+  - search() returns basic text matches
+
+# Dependencies
+depends_on: [P1-002, P1-003, P1-004]
+blocks: [P1-006, P1-007]

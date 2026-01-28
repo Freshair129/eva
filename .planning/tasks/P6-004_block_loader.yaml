@@ -1,0 +1,123 @@
+# Task: Implement BlockLoader
+id: P6-004
+phase: 6
+title: "Implement BlockLoader"
+status: pending
+priority: high
+estimated_lines: 80
+
+description: |
+  Implement BlockLoader that loads JSON blocks.
+
+output_file: "gks/loader/block_loader.py"
+
+spec: |
+  ```python
+  """BlockLoader - Loads knowledge blocks from JSON."""
+
+  from typing import Dict, Optional, List
+  from pathlib import Path
+  import json
+
+  from gks.schema.block_schema import KnowledgeBlock, BlockType
+
+
+  class BlockLoader:
+      """
+      Loads and caches knowledge blocks.
+
+      Reads JSON files from blocks/ directory.
+      Caches loaded blocks for performance.
+      """
+
+      # Block type to filename mapping
+      BLOCK_FILES = {
+          BlockType.MASTER: "master_block.json",
+          BlockType.ALGORITHM_HOW: "algorithm_how.json",
+          BlockType.CONCEPT_WHY: "concept_why.json",
+          BlockType.FRAMEWORK: "framework.json",
+          BlockType.PARAMETER_WHAT: "parameter_what.json",
+          BlockType.PROTOCOL_PROCESS: "protocol_process.json",
+          BlockType.SAFETY: "safety.json",
+      }
+
+      def __init__(self, blocks_dir: Path = None):
+          """
+          Initialize loader.
+
+          Args:
+              blocks_dir: Path to blocks directory.
+                          Defaults to gks/blocks/
+          """
+          if blocks_dir is None:
+              # Default to gks/blocks relative to this file
+              blocks_dir = Path(__file__).parent.parent / "blocks"
+          self._blocks_dir = blocks_dir
+          self._cache: Dict[BlockType, KnowledgeBlock] = {}
+
+      def load(self, block_type: BlockType) -> Optional[KnowledgeBlock]:
+          """
+          Load a block by type.
+
+          Args:
+              block_type: Type of block to load
+
+          Returns:
+              KnowledgeBlock or None if not found
+          """
+          # Check cache
+          if block_type in self._cache:
+              return self._cache[block_type]
+
+          # Load from file
+          filename = self.BLOCK_FILES.get(block_type)
+          if not filename:
+              return None
+
+          filepath = self._blocks_dir / filename
+          if not filepath.exists():
+              return None
+
+          with open(filepath, 'r', encoding='utf-8') as f:
+              data = json.load(f)
+
+          block = KnowledgeBlock.from_dict(data)
+          self._cache[block_type] = block
+          return block
+
+      def load_all(self) -> Dict[BlockType, KnowledgeBlock]:
+          """Load all blocks."""
+          blocks = {}
+          for block_type in BlockType:
+              block = self.load(block_type)
+              if block:
+                  blocks[block_type] = block
+          return blocks
+
+      def reload(self, block_type: BlockType) -> Optional[KnowledgeBlock]:
+          """Force reload a block (clear cache)."""
+          if block_type in self._cache:
+              del self._cache[block_type]
+          return self.load(block_type)
+
+      def get_available_blocks(self) -> List[BlockType]:
+          """List blocks that exist on disk."""
+          available = []
+          for block_type, filename in self.BLOCK_FILES.items():
+              if (self._blocks_dir / filename).exists():
+                  available.append(block_type)
+          return available
+
+      def clear_cache(self) -> None:
+          """Clear all cached blocks."""
+          self._cache.clear()
+  ```
+
+acceptance_criteria:
+  - File at gks/loader/block_loader.py
+  - Loads JSON files from blocks/
+  - Caches loaded blocks
+  - load_all() gets all blocks
+
+depends_on: [P6-003]
+blocks: [P6-005]

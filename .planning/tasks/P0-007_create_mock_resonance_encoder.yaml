@@ -1,0 +1,69 @@
+# Task: Create Mock Resonance Encoder
+id: P0-007
+phase: 0
+title: "Create MockResonanceEncoder"
+status: done
+priority: medium
+estimated_lines: 40
+
+# Description
+description: |
+  Create mock implementation of IResonanceEncoder for Phase 1.
+  Simple pass-through encoder that doesn't do real resonance calculation.
+
+# Output
+output_file: "adapters/mocks/mock_resonance_encoder.py"
+
+# Specification
+spec: |
+  ```python
+  import hashlib
+  import json
+  from datetime import datetime
+  from typing import Dict, Any
+  from contracts.ports.i_resonance_encoder import IResonanceEncoder
+
+
+  class MockResonanceEncoder(IResonanceEncoder):
+      """
+      Mock implementation of resonance encoder for Phase 1.
+
+      Does not perform real resonance calculations.
+      Returns neutral gray color and 0.5 intensity for all inputs.
+      """
+
+      def encode(self, raw_state: Dict[str, Any]) -> Dict[str, Any]:
+          """
+          Simple pass-through encoding.
+          Real RMS will do color mapping, intensity calculation, etc.
+          """
+          # Create hash of input for tracking
+          raw_hash = hashlib.md5(
+              json.dumps(raw_state, sort_keys=True, default=str).encode()
+          ).hexdigest()[:8]
+
+          return {
+              "encoded_at": datetime.now().isoformat(),
+              "resonance_color": "#808080",  # Gray (neutral)
+              "intensity": 0.5,              # Neutral intensity
+              "valence_color": "#808080",    # Neutral valence
+              "arousal_level": 0.5,          # Neutral arousal
+              "raw_hash": raw_hash,
+              "encoder_version": "mock_v1",
+              "source": "mock_resonance_encoder",
+          }
+
+      def get_encoder_id(self) -> str:
+          return "mock_resonance_encoder_v1"
+  ```
+
+# Acceptance Criteria
+acceptance_criteria:
+  - File exists at adapters/mocks/mock_resonance_encoder.py
+  - MockResonanceEncoder implements IResonanceEncoder
+  - encode() returns valid resonance format
+  - Type hints are complete
+
+# Dependencies
+depends_on: [P0-003]  # Needs IResonanceEncoder interface
+blocks: []

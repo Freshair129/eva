@@ -1,0 +1,121 @@
+# Task: Matrix Unit Tests
+id: P3-008
+phase: 3
+title: "Matrix unit tests"
+status: pending
+priority: medium
+estimated_lines: 100
+
+description: |
+  Create unit tests for EVA Matrix module.
+
+output_files:
+  - "eva_matrix/tests/test_matrix_state.py"
+  - "eva_matrix/tests/test_matrix_engine.py"
+
+spec: |
+  ## eva_matrix/tests/test_matrix_state.py
+  ```python
+  """Tests for MatrixState."""
+
+  import pytest
+  from eva_matrix.schema.matrix_state import MatrixState
+
+
+  class TestMatrixState:
+      def test_create_default(self):
+          """Default state is neutral."""
+          state = MatrixState()
+          assert state.pleasure == 0.0
+          assert state.arousal == 0.0
+          assert state.stress_level == 0.0
+
+      def test_values_clamped(self):
+          """Values outside range are clamped."""
+          state = MatrixState(pleasure=5.0, arousal=-5.0)
+          assert state.pleasure == 1.0
+          assert state.arousal == -1.0
+
+      def test_to_dict_and_back(self):
+          """Can serialize and deserialize."""
+          state = MatrixState(pleasure=0.5, warmth=0.8)
+          data = state.to_dict()
+          restored = MatrixState.from_dict(data)
+          assert restored.pleasure == 0.5
+          assert restored.warmth == 0.8
+
+      def test_dominant_emotion(self):
+          """get_dominant_emotion returns strongest."""
+          state = MatrixState(pleasure=0.1, arousal=0.9)
+          assert state.get_dominant_emotion() == "arousal"
+  ```
+
+  ## eva_matrix/tests/test_matrix_engine.py
+  ```python
+  """Tests for MatrixEngine."""
+
+  import pytest
+  from eva_matrix.matrix_engine import MatrixEngine
+
+
+  @pytest.fixture
+  def engine():
+      return MatrixEngine()
+
+
+  class TestMatrixEngine:
+      def test_get_state_initial(self, engine):
+          """Initial state is neutral."""
+          state = engine.get_state()
+          assert state.pleasure == 0.0
+
+      def test_process_stimulus(self, engine):
+          """process_stimulus changes state."""
+          engine.process_stimulus({"pleasure": 0.5})
+          state = engine.get_state()
+          assert state.pleasure > 0
+
+      def test_apply_emotion_joy(self, engine):
+          """apply_emotion('joy') increases pleasure."""
+          engine.apply_emotion("joy", intensity=0.8)
+          state = engine.get_state()
+          assert state.pleasure > 0
+          assert state.warmth > 0
+
+      def test_apply_emotion_sadness(self, engine):
+          """apply_emotion('sadness') decreases pleasure."""
+          engine.apply_emotion("sadness", intensity=0.8)
+          state = engine.get_state()
+          assert state.pleasure < 0
+
+      def test_decay_over_time(self, engine):
+          """State decays towards neutral."""
+          engine.process_stimulus({"arousal": 0.8})
+          state1 = engine.get_state()
+
+          engine.update(dt=5.0)
+          state2 = engine.get_state()
+
+          assert abs(state2.arousal) < abs(state1.arousal)
+
+      def test_stress_affects_sensitivity(self, engine):
+          """High stress makes emotions stronger."""
+          # Add stress
+          engine._stress.add_stress(0.8, "test")
+
+          # Apply stimulus
+          engine.process_stimulus({"pleasure": 0.3})
+          state = engine.get_state()
+
+          # Should be stronger than 0.3 due to stress modifier
+          assert state.pleasure > 0.3 * 0.9  # Allow for decay
+  ```
+
+acceptance_criteria:
+  - Test files created
+  - Tests for MatrixState schema
+  - Tests for MatrixEngine
+  - All tests pass
+
+depends_on: [P3-007]
+blocks: []

@@ -1,0 +1,207 @@
+# Task: Implement Glands
+id: P4-004
+phase: 4
+title: "Implement Glands (12 types)"
+status: pending
+priority: high
+estimated_lines: 200
+
+description: |
+  Implement the gland system that produces hormones.
+  Each gland manages one or more hormones.
+
+output_file: "physio_core/endocrine/glands.py"
+
+spec: |
+  ```python
+  """Glands - Hormone production system."""
+
+  from typing import Dict, List, Optional
+  from dataclasses import dataclass
+  from datetime import datetime
+
+  from physio_core.endocrine.hormones import HormoneDefinition, HORMONE_DEFINITIONS
+
+
+  @dataclass
+  class GlandState:
+      """State of a single gland."""
+      name: str
+      hormone: str
+      current_level: float
+      secretion_rate: float = 0.0
+      last_update: datetime = None
+
+      def __post_init__(self):
+          if self.last_update is None:
+              self.last_update = datetime.now()
+
+
+  class Gland:
+      """
+      A hormone-producing gland.
+
+      Manages production, release, and decay of a hormone.
+      """
+
+      def __init__(self, hormone_def: HormoneDefinition):
+          """
+          Initialize gland.
+
+          Args:
+              hormone_def: Definition of hormone this gland produces
+          """
+          self._def = hormone_def
+          self._level = hormone_def.baseline
+          self._secretion_rate = 0.0
+          self._last_update = datetime.now()
+
+      @property
+      def hormone_name(self) -> str:
+          return self._def.name
+
+      @property
+      def level(self) -> float:
+          return self._level
+
+      @level.setter
+      def level(self, value: float):
+          self._level = max(self._def.min_level, min(self._def.max_level, value))
+
+      def stimulate(self, intensity: float) -> float:
+          """
+          Stimulate gland to release hormone.
+
+          Args:
+              intensity: Stimulation intensity (0-1)
+
+          Returns:
+              Amount released
+          """
+          release_amount = intensity * self._def.release_rate
+          self._level = min(self._def.max_level, self._level + release_amount)
+          self._secretion_rate = intensity
+          return release_amount
+
+      def inhibit(self, intensity: float) -> float:
+          """
+          Inhibit gland, reducing hormone.
+
+          Args:
+              intensity: Inhibition intensity (0-1)
+
+          Returns:
+              Amount reduced
+          """
+          reduce_amount = intensity * self._def.release_rate * 0.5
+          self._level = max(self._def.min_level, self._level - reduce_amount)
+          return reduce_amount
+
+      def decay(self, dt: float) -> float:
+          """
+          Apply time-based decay towards baseline.
+
+          Args:
+              dt: Time delta in seconds
+
+          Returns:
+              New level
+          """
+          # Exponential decay
+          half_life = self._def.half_life
+          decay_factor = 0.5 ** (dt / half_life)
+
+          diff = self._level - self._def.baseline
+          self._level = self._def.baseline + (diff * decay_factor)
+
+          self._secretion_rate *= decay_factor
+          return self._level
+
+      def get_state(self) -> GlandState:
+          """Get current gland state."""
+          return GlandState(
+              name=f"gland_{self._def.name}",
+              hormone=self._def.name,
+              current_level=self._level,
+              secretion_rate=self._secretion_rate,
+              last_update=datetime.now()
+          )
+
+
+  class EndocrineSystem:
+      """
+      Complete endocrine system with all 12 glands.
+      """
+
+      def __init__(self):
+          """Initialize all glands."""
+          self._glands: Dict[str, Gland] = {}
+          for name, definition in HORMONE_DEFINITIONS.items():
+              self._glands[name] = Gland(definition)
+
+      def get_hormone(self, name: str) -> float:
+          """Get current level of a hormone."""
+          if name in self._glands:
+              return self._glands[name].level
+          return 0.5
+
+      def get_all_hormones(self) -> Dict[str, float]:
+          """Get all hormone levels."""
+          return {name: gland.level for name, gland in self._glands.items()}
+
+      def stimulate(self, hormone: str, intensity: float) -> None:
+          """Stimulate a gland."""
+          if hormone in self._glands:
+              self._glands[hormone].stimulate(intensity)
+              # Apply synergist effects
+              self._apply_synergies(hormone, intensity)
+
+      def inhibit(self, hormone: str, intensity: float) -> None:
+          """Inhibit a gland."""
+          if hormone in self._glands:
+              self._glands[hormone].inhibit(intensity)
+
+      def _apply_synergies(self, hormone: str, intensity: float) -> None:
+          """Apply synergist and antagonist effects."""
+          definition = HORMONE_DEFINITIONS.get(hormone)
+          if not definition:
+              return
+
+          # Boost synergists
+          for syn in definition.synergists:
+              if syn in self._glands:
+                  self._glands[syn].stimulate(intensity * 0.3)
+
+          # Inhibit antagonists
+          for ant in definition.antagonists:
+              if ant in self._glands:
+                  self._glands[ant].inhibit(intensity * 0.2)
+
+      def update(self, dt: float) -> Dict[str, float]:
+          """
+          Update all glands with time decay.
+
+          Args:
+              dt: Time delta in seconds
+
+          Returns:
+              All current hormone levels
+          """
+          for gland in self._glands.values():
+              gland.decay(dt)
+          return self.get_all_hormones()
+
+      def reset_to_baseline(self) -> None:
+          """Reset all hormones to baseline."""
+          for name, definition in HORMONE_DEFINITIONS.items():
+              self._glands[name].level = definition.baseline
+  ```
+
+acceptance_criteria:
+  - File at physio_core/endocrine/glands.py
+  - Gland class with stimulate/inhibit/decay
+  - EndocrineSystem manages all 12
+  - Synergist/antagonist interactions
+
+depends_on: [P4-003]
+blocks: [P4-005, P4-009]

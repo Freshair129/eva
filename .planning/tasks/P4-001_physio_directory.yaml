@@ -1,0 +1,55 @@
+# Task: Create PhysioCore Directory
+id: P4-001
+phase: 4
+title: "Create PhysioCore directory structure"
+status: pending
+priority: high
+estimated_lines: 10
+
+description: |
+  Create PhysioCore (biology system) directory structure.
+  This is the hormone/biological simulation engine.
+
+output_files:
+  - "physio_core/__init__.py"
+  - "physio_core/endocrine/__init__.py"
+  - "physio_core/blood/__init__.py"
+  - "physio_core/vitals/__init__.py"
+  - "physio_core/receptor/__init__.py"
+  - "physio_core/schema/__init__.py"
+  - "physio_core/tests/__init__.py"
+
+spec: |
+  ```
+  physio_core/
+  ├── __init__.py
+  ├── endocrine/
+  │   └── __init__.py
+  ├── blood/
+  │   └── __init__.py
+  ├── vitals/
+  │   └── __init__.py
+  ├── receptor/
+  │   └── __init__.py
+  ├── schema/
+  │   └── __init__.py
+  └── tests/
+      └── __init__.py
+  ```
+
+  ## physio_core/__init__.py
+  ```python
+  """
+  PhysioCore - Biological Simulation System
+
+  12-hormone endocrine system with circulation and vitals.
+  """
+  __version__ = "0.1.0"
+  ```
+
+acceptance_criteria:
+  - physio_core/ directory exists
+  - All subdirectories with __init__.py
+
+depends_on: []
+blocks: [P4-002, P4-003]
