@@ -30,6 +30,7 @@ trigger: always_on
 |----------|-------------|
 | `glossary.md` | Term definitions |
 | `versioning.md` | Version control enforcement |
+| `backlog.md` | Future task tracking |
 
 ---
 
