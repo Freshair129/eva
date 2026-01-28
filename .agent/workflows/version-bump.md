@@ -87,6 +87,14 @@ Add summary entry under the appropriate section with link to module's VERSION_HI
 - Detail 2
 ```
 
+### Step 7: Sync with Remote Repository
+// turbo
+```bash
+git add -A
+git commit -m "[{Module}] v{X.Y.Z}: {Brief description}"
+git push origin main
+```
+
 **Example:**
 ```
 [MSP] v0.0.8: File-per-Record Architecture

@@ -12,6 +12,7 @@
 1. **Bump the version** in `__init__.py`
 2. **Update `VERSION_HISTORY.md`** in that module
 3. **Update main `CHANGELOG.md`** with summary
+4. **Sync changes to Git** (Commit & Push)
 
 ---
 
