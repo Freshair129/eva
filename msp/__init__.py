@@ -16,8 +16,9 @@ Version History:
 - 0.1.1: Bidirectional Memory Crosslinks (Episodic <-> Sensory <-> Semantic)
 - 0.2.0: FileMemoryStore implementation (P1-005)
 - 0.2.1: WorkflowState for task tracking within episodes
+- 0.3.0: ChromaDB integration for semantic search (P1-006)
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __schema_version__ = "episodic_v3"  # Sensory is SMEM_v1
 

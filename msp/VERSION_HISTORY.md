@@ -1,8 +1,19 @@
 # MSP Version History
 
 > **Module:** Memory & Soul Passport (MSP)
-> **Current Version:** 0.2.1
+> **Current Version:** 0.3.0
 > **Schema Version:** episodic_v3
+
+---
+
+## [0.3.0] - 2026-01-29
+
+### Added
+- **ChromaDB Bridge** (`chroma_store.py`):
+    - Added vector storage support using `chromadb`.
+    - Automated indexing of Turns and Episode summaries.
+    - `semantic_search` support for natural language retrieval.
+- **Port Refinement**: Added `semantic_search` to `IMemoryStorage`.
 
 ---
 

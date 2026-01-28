@@ -45,15 +45,23 @@ class IMemoryStorage(ABC):
         filters: Dict[str, Any],
         limit: int = 10
     ) -> List[Dict[str, Any]]:
+        """Queries memories with filters."""
+        pass
+
+    @abstractmethod
+    def semantic_search(
+        self,
+        query_text: str,
+        limit: int = 10,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
         """
-        Queries memories with filters.
-
+        Performs vector search based on meaning.
+        
         Args:
-            filters: Query filters (keyword, date_range, etc.)
-            limit: Maximum results to return
-
-        Returns:
-            List of matching memories
+            query_text: The natural language query
+            limit: Maximum results
+            filters: Optional metadata filters
         """
         pass
 

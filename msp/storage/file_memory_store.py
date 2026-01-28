@@ -104,6 +104,16 @@ class FileMemoryStore(IMemoryStorage):
         
         return results
 
+    def semantic_search(
+        self, 
+        query_text: str, 
+        limit: int = 10, 
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """FileMemoryStore does not support vector search yet."""
+        logger.warning("Attempted semantic search on FileMemoryStore. Returning empty list.")
+        return []
+
     def delete(self, memory_id: str) -> bool:
         """Deletes the memory file."""
         for path in self.base_dir.rglob(f"{memory_id}.json"):
