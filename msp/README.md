@@ -1,4 +1,4 @@
-# MSP Master Specification (v0.0.8)
+# MSP Master Specification (v0.1.0)
 
 > **Module:** Memory & Soul Passport (MSP)
 > **Status:** Current Standard
@@ -10,7 +10,7 @@
 MSP is the unified memory system for EVA. It manages three types of memories:
 1. **Episodic**: Autobiographical experiences (conversations, events).
 2. **Semantic**: Factual knowledge (Subject-Predicate-Object).
-3. **Sensory**: Raw perceptual data (Coming in P1-004).
+3. **Sensory**: Raw perceptual data and Qualia (subjective experience).
 
 ---
 
@@ -68,16 +68,37 @@ Stored in a graph-ready format.
 
 ---
 
-## 5. Prevention of Hallucination (Guide for Agent)
+## 5. Sensory Memory Schema (v1)
+Stored in `memory/turns/sensory/`. Captures "Qualia" (the feeling of now).
+
+### 5.1 SensoryMemory Fields
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `sensory_id` | `str` | Unique ID | `SMEM_20260129_001` |
+| `episode_id` | `str` | Link to Episode | `EP_20260128_001` |
+| `data_type` | `str` | format | `image`, `audio`, `visual_pattern` |
+| `qualia` | `Obj` | Subjective experience | See 5.2 |
+| `physio_snapshot` | `Dict` | Hormones at time T | `{"dopamine": 0.5, ...}` |
+
+### 5.2 Qualia (Phenomenology)
+- `color_hex`: Dominant "color" of the feeling (e.g., `#E6E6FA`).
+- `texture`: Texture of thought (`smooth`, `sharp`, `liquid`).
+- `soundscape`: Passive sound context (`white_noise`, `serene`).
+- `intensity`: Strength of the experience (0.0 - 1.0).
+
+---
+
+## 6. Prevention of Hallucination (Guide for Agent)
 **CRITICAL RULES:**
 1. **Never Assume Intent**: If `intent` is missing in `TurnUser`, infer from `text_excerpt` only if high confidence.
 2. **Context Honor**: If `location_context` is `mobile_ssh`, **NEVER** output more than 2-3 lines of code unless explicitly asked.
 3. **Role Lock**: If `agent_role` is `Senior Dev`, the `epistemic_mode` in the next `TurnLLM` should lean towards `assert` or `caution`.
 4. **Summary Loyalty**: When summarizing, the `future_implication` must be traceable to the `key_outcome`.
+5. **Qualia Consistency**: If `SensoryMemory` shows `intensity: 0.9` and `texture: sharp`, the `TurnLLM` response should be concise and direct, reflecting an "alert" state.
 
 ---
 
-## 6. Example JSON (Episodic)
+## 7. Example JSON (Episodic)
 ```json
 {
   "episode_id": "EP_001",
@@ -91,6 +112,25 @@ Stored in a graph-ready format.
     "action_taken": "Proposed File-per-Record architecture",
     "key_outcome": "User approved the change",
     "future_implication": "Redesign episodic.py"
+  }
+}
+```
+
+---
+
+## 8. Example JSON (Sensory)
+```json
+{
+  "sensory_id": "SMEM_001",
+  "episode_id": "EP_001",
+  "data_type": "visual_pattern",
+  "qualia": {
+    "color_hex": "#E6E6FA",
+    "texture": "soft",
+    "intensity": 0.8
+  },
+  "physio_snapshot": {
+    "dopamine": 0.7
   }
 }
 ```
