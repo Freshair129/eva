@@ -30,6 +30,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     - Infrastructure: `SimpleBus` (in-memory pub/sub)
     - Configuration: `master_registry.yaml` (SSOT)
     - Testing: `pytest` framework with fixtures and unit tests
+    - **Decision Log** (P0-011): Central repository for tracking architectural and persona conclusions.
 
 ### Changed
 - **MSP Layer (Phase 1) [Implemented by Antigravity]**
