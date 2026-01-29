@@ -74,8 +74,20 @@ class EVAMatrixSystem:
         # Per eva_matrix.py source: payload.get("receptor_signals", {})
         
         # For Phase 2/3 transition, we might get simplified payload
+        # For Phase 4, PhysioCore sends: { "impact": {...}, "state_snapshot": {"hormones": {...}} }
         hormones = payload.get("hormones", {})
+        
         if not hormones:
+            # Check state_snapshot (Full state)
+            snapshot = payload.get("state_snapshot", {})
+            hormones = snapshot.get("hormones", {})
+            
+        if not hormones:
+            # Check impact (Delta only)
+            hormones = payload.get("impact", {})
+            
+        if not hormones:
+            # Legacy Phase 2/3
             hormones = payload.get("receptor_signals", {})
             
         if hormones:

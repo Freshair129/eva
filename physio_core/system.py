@@ -70,31 +70,65 @@ class PhysioSystem(IStateProvider):
     def process_stimulus(self, stimulus_type: str, intensity: float = 1.0) -> Dict[str, float]:
         """
         Reacts to an external stimulus (e.g. 'threat', 'praise').
-        Injects hormones based on STIMULUS_MAP.
+        Injects hormones based on STIMULUS_MAP and Reflex Configs.
         """
         self.update()
         
-        impact = STIMULUS_MAP.get(stimulus_type)
+        impact = {}
+        
+        # 1. Check Standard Stimulus Map (Synthesis)
+        # Parameters loaded from hormone_spec_ml.yaml
+        # exact match check
+        if stimulus_type in STIMULUS_MAP:
+            for hormone, val in STIMULUS_MAP[stimulus_type].items():
+                impact[hormone] = val * intensity
+
+        # 2. Check Reflex Paths (Fast Path)
+        # Loaded from PhysioCore_configs.yaml
+        from .parameters import SYSTEM_CONFIG
+        reflexes = SYSTEM_CONFIG.get("subsystems", {}).get("reflex", {}).get("pathway_mapping", [])
+        
+        for reflex in reflexes:
+            if reflex.get("stimulus_type") == stimulus_type:
+                # Target receptor usually ESC_Hxx_NAME, we need the simple name
+                target = reflex.get("target_receptor", "")
+                # Extract simple name if possible, or use map
+                # E.g. ESC_H01_ADRENALINE -> adrenaline
+                # We need a map from ESC ID to simple name.
+                # For now, let's just crude parse or look it up.
+                simple_name = self._resolve_hormone_name(target)
+                gain = reflex.get("gain_modifier", 1.0)
+                
+                if simple_name:
+                    current = impact.get(simple_name, 0.0)
+                    impact[simple_name] = current + (gain * intensity)
+
         if impact:
-            # Scale impact by intensity
-            real_impact = {h: val * intensity for h, val in impact.items()}
-            
             # Use CirculatorySystem to inject hormones (triggers heart rate, etc.)
-            for hormone, amount in real_impact.items():
+            for hormone, amount in impact.items():
                 self.circulatory.add_hormone(hormone, amount)
             
-            # Publish reaction to bus
-            if self.bus:
                 self.bus.publish("bus:physical", {
                     "signal_type": "hormone_response",
                     "trigger": stimulus_type,
-                    "impact": real_impact,
+                    "impact": impact,
                     "state_snapshot": self.circulatory.get_state()
                 })
             
-            return real_impact
+            return impact
         # If unknown stimulus, generic response?
         return {}
+
+    def _resolve_hormone_name(self, esc_id: str) -> Optional[str]:
+        """Helper: Maps ESC_H01_ADRENALINE -> adrenaline"""
+        # Simple heuristic: Split by underscore and take last part?
+        # ESC_H01_ADRENALINE -> ADRENALINE. Lowercase -> adrenaline.
+        # ESC_N02_DOPAMINE -> dopamine
+        if not esc_id: return None
+        parts = esc_id.split("_")
+        if len(parts) >= 3:
+            return parts[-1].lower()
+        return None
 
     def get_bio_digital_gap(self) -> float:
         """Returns the current pause duration (seconds) required for biological realism."""

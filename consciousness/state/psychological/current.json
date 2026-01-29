@@ -1,12 +1,26 @@
 {
-    "timestamp": "2026-01-29T23:22:00+07:00",
-    "emotions": {
-        "valence": 0.7,
-        "arousal": 0.4,
-        "dominance": 0.6
-    },
-    "mood": "calm_engaged",
-    "primary_emotion": "curiosity",
-    "secondary_emotion": "contentment",
-    "source": "mock_matrix_provider"
+  "timestamp": "2026-01-29T20:54:57.230111+00:00",
+  "emotions": {
+    "valence": 0.171,
+    "arousal": 0.171,
+    "dominance": 0.171
+  },
+  "axes_9d": {
+    "stress": 0.171,
+    "warmth": 0.171,
+    "drive": 0.171,
+    "clarity": 0.171,
+    "joy": 0.171,
+    "stability": 0.5,
+    "orientation": 0.5,
+    "primary": "stress",
+    "secondary": "warmth"
+  },
+  "mood": "Sadness",
+  "primary_emotion": "stress",
+  "secondary_emotion": "warmth",
+  "momentum": {
+    "intensity": 0.157
+  },
+  "source": "eva_matrix_system"
 }

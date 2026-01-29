@@ -1,56 +1,72 @@
 """
 PhysioCore Parameters - Biological Constants.
-Defines baselines, decay rates (half-life), and thresholds.
+Loads authoritative specs from YAML configurations.
 """
 
-# Biological Constants
-TICK_RATE_HZ = 30  # Simulation updates per second (virtual time)
+import yaml
+from pathlib import Path
+
+# Paths
+CONFIG_DIR = Path(__file__).parent / "configs"
+HORMONE_SPEC_PATH = CONFIG_DIR / "hormone_spec_ml.yaml"
+SYSTEM_CONFIG_PATH = CONFIG_DIR / "PhysioCore_configs.yaml"
+
+def load_hormone_specs():
+    """Parses hormone_spec_ml.yaml to extract baselines and half-lives."""
+    if not HORMONE_SPEC_PATH.exists():
+        return {}, {}, {}
+
+    try:
+        with open(HORMONE_SPEC_PATH, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+    except Exception as e:
+        print(f"[PhysioCore] Error loading hormone specs: {e}")
+        return {}, {}, {}
+        
+    specs = data.get("chemical_specs", {})
+    
+    baselines = {}
+    half_lives = {}
+    mappings = {}
+    
+    for key, info in specs.items():
+        if not isinstance(info, dict): continue
+        
+        # normalized name: lowercase key (e.g. dopamine) or use name field
+        name = info.get("name", key).lower()
+        
+        # Baseline
+        baselines[name] = float(info.get("baseline", 0.0))
+        
+        # Half-life
+        phy = info.get("physical", {})
+        half_lives[name] = float(phy.get("half_life_sec", 300))
+        
+        # Stimulus Mappings
+        stim_map = info.get("stimulus_mapping", {})
+        if stim_map:
+            for stim, impact in stim_map.items():
+                if stim not in mappings:
+                    mappings[stim] = {}
+                mappings[stim][name] = float(impact)
+
+    return baselines, half_lives, mappings
+
+def load_system_config():
+    """Parses PhysioCore_configs.yaml."""
+    if not SYSTEM_CONFIG_PATH.exists():
+        return {}
+    try:
+        with open(SYSTEM_CONFIG_PATH, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except:
+        return {}
+
+# Load Data (Module Level)
+BASELINES, HALF_LIVES, STIMULUS_MAP = load_hormone_specs()
+SYSTEM_CONFIG = load_system_config()
+
+# Global Defaults
+TICK_RATE_HZ = SYSTEM_CONFIG.get("global", {}).get("update_rate_hz", 30)
+if TICK_RATE_HZ <= 0: TICK_RATE_HZ = 30
 SEC_PER_TICK = 1.0 / TICK_RATE_HZ
-
-# 1. Hormone Baselines (Homeostatic Targets)
-# Range: 0.0 to 1.0
-BASELINES = {
-    "dopamine": 0.5,      # Reward/Drive
-    "serotonin": 0.5,     # Mood/Stability
-    "oxytocin": 0.5,      # Social/Warmth
-    "cortisol": 0.3,      # Stress/Alertness (lower baseline for health)
-    "adrenaline": 0.2,    # Fight/Flight (low baseline)
-    "endorphin": 0.2,     # Pain relief/Joy
-    "acetylcholine": 0.5, # Focus/Learning
-    "noradrenaline": 0.3, # Vigilance
-    "melatonin": 0.1,     # Circadian (varies by time)
-    "testosterone": 0.5,  # Dominance/Confidence
-    "estrogen": 0.5,      # Empathy/Sensitivity
-    "vasopressin": 0.5    # Memory/Bonding
-}
-
-# 2. Decay Rates (Half-life in Virtual Seconds)
-# How fast hormones return to baseline
-# Fast decay = volatile emotion (e.g. Adrenaline)
-# Slow decay = mood (e.g. Serotonin)
-HALF_LIVES = {
-    "dopamine": 300,      # 5 mins
-    "serotonin": 1800,    # 30 mins
-    "oxytocin": 1200,     # 20 mins
-    "cortisol": 900,      # 15 mins
-    "adrenaline": 60,     # 1 min (very fast drop)
-    "endorphin": 600,     # 10 mins
-    "acetylcholine": 300, # 5 mins
-    "noradrenaline": 120, # 2 mins
-    "melatonin": 3600,    # 1 hour
-    "testosterone": 3600, # 1 hour
-    "estrogen": 3600,     # 1 hour
-    "vasopressin": 1800   # 30 mins
-}
-
-# 3. Stimulus Impact Map
-# Maps abstract stimuli to hormone secretions (Synthesis)
-STIMULUS_MAP = {
-    "praise": {"dopamine": 0.2, "oxytocin": 0.1},
-    "threat": {"adrenaline": 0.4, "cortisol": 0.2},
-    "task_completion": {"dopamine": 0.3, "endorphin": 0.1},
-    "social_connection": {"oxytocin": 0.3, "serotonin": 0.1},
-    "learning": {"acetylcholine": 0.3},
-    "confusion": {"cortisol": 0.1, "noradrenaline": 0.1},
-    "timeout": {"cortisol": 0.05}
-}
