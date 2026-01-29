@@ -45,7 +45,8 @@ class OrchestratorEngine:
         llm_provider: ILLMProvider,
         cim: CIMEngine,
         bus: Optional[IBus] = None,
-        msp: Any = None
+        msp: Any = None,
+        max_history_turns: int = 20
     ):
         """
         Initialize Orchestrator.
@@ -55,11 +56,16 @@ class OrchestratorEngine:
             cim: Context Injection Manager
             bus: Event bus (optional)
             msp: Memory system (optional)
+            max_history_turns: Number of turns to keep in context
         """
         self._llm = llm_provider
         self._cim = cim
         self._bus = bus
         self._msp = msp
+        self._max_history_turns = max_history_turns
+        self._context_builder = ContextBuilder()
+        self._conversation_history: List[ConversationTurn] = []
+        self._bus = bus
         self._context_builder = ContextBuilder()
         self._conversation_history: List[ConversationTurn] = []
 
@@ -139,10 +145,13 @@ class OrchestratorEngine:
         ))
 
     def _get_history_for_llm(self) -> List[Dict[str, str]]:
-        """Format history for LLM."""
+        """Format history for LLM with sliding window."""
+        # Sliding window: keep only last N turns
+        recent_history = self._conversation_history[-self._max_history_turns:]
+        
         return [
             {"role": turn.role, "content": turn.content}
-            for turn in self._conversation_history
+            for turn in recent_history
         ]
 
     def _publish_turn_event(self, user_input: str, response: str) -> None:
