@@ -33,14 +33,10 @@ def verify_h5_integration():
     print("Processing message...")
     orch.process("Hello")
     
-    # Check Internal History
-    last_turn = orch.get_history()[-1]
-    print(f"Last Turn Tag: {last_turn.h5_tag}")
-    
-    # Expecting default [H5-000000000000] because we passed empty state
-    # (Checking if it starts with [H5-)
-    assert last_turn.h5_tag is not None, "Tag should be generated"
-    assert last_turn.h5_tag.startswith("[H5-"), "Tag should have H5 prefix"
+    # Expecting default [E9-00000000000000000000] 
+    # (Checking if it starts with [E9-)
+    assert last_turn.e9_tag is not None, "Tag should be generated"
+    assert last_turn.e9_tag.startswith("[E9-"), "Tag should have E9 prefix"
     
     # Check LLM History View
     history_view = orch._get_history_for_llm()
@@ -48,7 +44,7 @@ def verify_h5_integration():
     content = last_msg["content"]
     print(f"LLM View Content: '{content}'")
     
-    assert "[H5-" in content, "LLM content should contain the tag"
+    assert "[E9-" in content, "LLM content should contain the tag"
     assert content.endswith("]"), "LLM content should end with the tag"
     
     print("\n[PASS] H5 Integration successful!")

@@ -5,11 +5,11 @@ Includes H5 Resonance Codec for state compression.
 
 from typing import Dict, Any, Union
 
-class H9ResonanceCodec:
+class E9ResonanceCodec:
     """
-    Implements the H9 Resonance Compression Protocol (ADR-007).
+    Implements the E9 Resonance Compression Protocol (ADR-007).
     
-    Format: [H9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Orientation}{Momentum}{Urgency}]
+    Format: [E9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Orientation}{Momentum}{Urgency}]
     Encoding: 0.XX -> XX, 1.0 -> M
     """
 
@@ -36,15 +36,15 @@ class H9ResonanceCodec:
             state: Dictionary containing float values (0.0-1.0) for 9 keys.
                    
         Returns:
-            Formatted string: [H9-4555M62575080601590]
+            Formatted string: [E9-4555M62575080601590]
         """
         parts = []
         
-        for key in H9ResonanceCodec.KEYS:
+        for key in E9ResonanceCodec.KEYS:
             value = state.get(key, 0.0)
-            parts.append(H9ResonanceCodec._encode_value(value))
+            parts.append(E9ResonanceCodec._encode_value(value))
             
-        return f"[H9-{''.join(parts)}]"
+        return f"[E9-{''.join(parts)}]"
 
     @staticmethod
     def _encode_value(value: Union[float, int]) -> str:
@@ -63,4 +63,4 @@ class H9ResonanceCodec:
 
 def compress_state(state: Dict[str, float]) -> str:
     """Public tool function to compress state."""
-    return H9ResonanceCodec.encode(state)
+    return E9ResonanceCodec.encode(state)

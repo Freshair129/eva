@@ -10,8 +10,8 @@ Passing full JSON state objects consumes excessive tokens. We need a lossless co
 ## Solution
 Implement **H9 Resonance Codec**.
 
-### Protocol Specification: H9
-Format: `[H9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Orientation}{Momentum}{Urgency}]`
+### Protocol Specification: E9
+Format: `[E9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Orientation}{Momentum}{Urgency}]`
 
 **Fields (10 Total - RI + 9 attributes):**
 1. **RI**: Resonance Index (Cognitive Alignment)
@@ -29,7 +29,7 @@ Format: `[H9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Or
 - Precision: 2 decimal places (0.XX -> XX).
 - Max: 1.0 -> M.
 - Length: Fixed 20 chars (or 10 chars if using M).
-- Example: `[H9-4555M62575080601590]`
+- Example: `[E9-4555M62575080601590]`
 
 ### Benefits (Benefit²)
 1. **Compression:** Reduces ~100 chars to ~15 chars (~85% saving).
