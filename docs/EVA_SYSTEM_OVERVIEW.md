@@ -18,7 +18,7 @@
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║  Phase 0: Foundation    ████████████ 100% [DONE]                              ║
 ║  Phase 1: MSP Core      ████████████ 100% [DONE]                              ║
-║  Phase 2: Orchestration ░░░░░░░░░░░░   0% [PENDING]                           ║
+║  Phase 2: Orchestration ████████████ 100% [DONE]                              ║
 ║  Phase 3: Psychology    ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 4: Biology       ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 5: Perception    ░░░░░░░░░░░░   0% [PENDING]                           ║
@@ -60,6 +60,18 @@ E:\eva\
 │   │   └── chroma_store.py       [DONE] Vector DB backend
 │   └── tests/
 │       └── verify_*.py (8 files) [DONE] Comprehensive tests
+│
+├── orchestrator/                 # CNS v0.1.0 (Orchestra Layer)
+│   ├── orchestrator_engine.py    [DONE] Master coordinator
+│   ├── cim/                      # CIM v0.1.0 (Context Assembly)
+│   │   ├── cim_engine.py         [DONE] Multi-source context assembly
+│   │   └── context_builder.py    [DONE] LLM message formatting
+│   ├── llm_bridge/               # LLM Adapters
+│   │   ├── mock_llm.py           [DONE] Static/Trigger testing
+│   │   └── ollama_adapter.py     [DONE] Local inference (Llama, Qwen)
+│   └── integration/              # Hooks
+│       ├── msp_integration.py    [DONE] Automated memory persistence
+│       └── bus_integration.py    [DONE] State/Event pub-sub
 │
 ├── config/
 │   └── master_registry.yaml      [DONE] SSOT for system topology

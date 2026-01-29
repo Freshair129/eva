@@ -42,6 +42,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
         - **MSPEngine Integration** (v0.4.0): Unified storage orchestration & hydrated search
         - **ChromaDB Support** (v0.3.0): Integrated vector search for semantic retrieval
         - See: [msp/VERSION_HISTORY.md](msp/VERSION_HISTORY.md) for full changelog
+- **Orchestration Layer (Phase 2) [Implemented by Antigravity]**
+    - Established Orchestrator directory structure (`orchestrator/`, `orchestrator/cim/`, `orchestrator/llm_bridge/`) (P2-001)
+    - **LLM Bridge** (v0.1.0): Support for MockLLM and local Ollama inference (P2-002, P2-003, P2-004)
+    - **CIM Engine** (v0.1.0): Context Injection Manager for gathering MSP and Bus context (P2-005, P2-006)
+    - **Orchestrator Engine** (v0.1.0): Central Nervous System coordinating the cognitive loop (P2-007)
+    - **MSP & Bus Integration**: Automated memory persistence and event publishing (P2-008, P2-009)
+    - See: [orchestrator/VERSION_HISTORY.md](orchestrator/VERSION_HISTORY.md) and [orchestrator/cim/VERSION_HISTORY.md](orchestrator/cim/VERSION_HISTORY.md) for details.
 
 
 ### Architecture Decisions
