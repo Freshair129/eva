@@ -16,7 +16,7 @@ These tools are essential for the agent to function as a continuous entity.
 | `save_memory` | Explicitly saves a new memory or fact. | `save_memory(content: str, type: str = "episodic", importance: float = 0.5) -> str` |
 | `introspect_state` | Returns the detailed internal state (Bio/Psych/Qualia). | `introspect_state() -> Dict` |
 | `get_time` | Returns current date, time, and timezone. | `get_time() -> str` |
-| `compress_state` | Encodes state dict to H5 string. | `compress_state(state: Dict) -> str` |
+| `compress_state` | Encodes state dict to E9 string. | `compress_state(state: Dict) -> str` |
 
 ---
 
