@@ -161,6 +161,11 @@ E:\eva\
 │   │   │  │ResonanceBus│ │ PhysioCore │ │ EVAMatrix  │ │ Qualia   │ │   │   │
 │   │   │  │ [PENDING]  │ │Prov [PEND] │ │Prov [PEND] │ │Eng [PEND]│ │   │   │
 │   │   │  └────────────┘ └────────────┘ └────────────┘ └──────────┘ │   │   │
+│   │   │                                                                     │   │
+│   │   │  ┌──────────────────────────────────────────────────────────────┐   │   │
+│   │   │  │                 CONSCIOUSNESS (Active State)                 │   │   │
+│   │   │  │  [identity/] [state/] [knowledge/] [prompts/] (v0.1.0)       │   │   │
+│   │   │  └──────────────────────────────────────────────────────────────┘   │   │
 │   │   │  ┌────────────┐ ┌────────────┐ ┌────────────────────────┐  │   │   │
 │   │   │  │ OllamaLLM  │ │   GKS      │ │      RMSEngine         │  │   │   │
 │   │   │  │ [PENDING]  │ │Load [PEND] │ │      [PENDING]         │  │   │   │

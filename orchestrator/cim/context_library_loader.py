@@ -19,7 +19,7 @@ class ContextLibraryLoader:
     - prompts/: Reusable prompt fragments
     """
 
-    def __init__(self, library_path: str = "context_library"):
+    def __init__(self, library_path: str = "consciousness"):
         self._library_path = Path(library_path)
         self._cache: Dict[str, str] = {}
 
@@ -155,7 +155,7 @@ class ContextLibraryLoader:
 _default_loader: Optional[ContextLibraryLoader] = None
 
 
-def get_context_library(library_path: str = "context_library") -> ContextLibraryLoader:
+def get_context_library(library_path: str = "consciousness") -> ContextLibraryLoader:
     """Get or create the default context library loader."""
     global _default_loader
     if _default_loader is None:

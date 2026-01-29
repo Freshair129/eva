@@ -14,7 +14,7 @@ def verify_context_library():
 
     # Step 1: Test ContextLibraryLoader standalone
     print("Step 1: Testing ContextLibraryLoader...")
-    loader = ContextLibraryLoader("context_library")
+    loader = ContextLibraryLoader("consciousness")
     
     identity = loader.load_identity()
     assert len(identity) > 100, "Identity should load content"
@@ -37,7 +37,7 @@ def verify_context_library():
 
     # Step 2: Test CIMEngine integration
     print("Step 2: Testing CIMEngine with library...")
-    cim = CIMEngine(library_path="context_library")
+    cim = CIMEngine(library_path="consciousness")
     
     # Check that identity was auto-loaded
     assert len(cim._system_identity) > 100, "CIM should auto-load identity"

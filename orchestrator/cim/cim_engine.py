@@ -44,7 +44,7 @@ class CIMEngine:
         system_identity: str = "",
         max_memory_items: int = 5,
         max_context_tokens: int = 4000,
-        library_path: str = "context_library"
+        library_path: str = "consciousness"
     ):
         """
         Initialize CIM.
