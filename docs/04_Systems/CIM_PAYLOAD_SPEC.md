@@ -84,12 +84,12 @@ You are EVA. Respond naturally and authentically.
 
 ---
 
-## 5. Resonance Compression Protocol (H9)
+## 5. Resonance Compression Protocol (H8)
 
-To optimize token usage for **State History**, we use the `H9` codec.
+To optimize token usage for **State History**, we use the `H8` codec.
 
 ### Format
-`[H9-{RI}{Str}{War}{Dri}{Cla}{Joy}{Sta}{Ori}{Mom}]`
+`[H8-{RI}{Str}{War}{Dri}{Cla}{Joy}{Sta}{Ori}{Mom}]`
 
 ### Fields
 1. RI (Resonance Index)
