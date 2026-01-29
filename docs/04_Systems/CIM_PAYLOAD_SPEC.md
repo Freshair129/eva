@@ -84,19 +84,26 @@ You are EVA. Respond naturally and authentically.
 
 ---
 
-## 5. Resonance Compression Protocol (H5)
+## 5. Resonance Compression Protocol (H9)
 
-To optimize token usage for **State History**, we use the `H5` codec.
+To optimize token usage for **State History**, we use the `H9` codec.
 
 ### Format
-`[H5-{RI}{Stress}{Social}{Drive}{Clarity}{Joy}]`
+`[H9-{RI}{Str}{War}{Dri}{Cla}{Joy}{Sta}{Ori}{Mom}]`
 
-### Encoding Table
-- `0.XX` -> `XX` (e.g., `0.45` -> `45`)
-- `1.00` -> `M`
+### Fields
+1. RI (Resonance Index)
+2. Stress
+3. Warmth
+4. Drive
+5. Clarity
+6. Joy
+7. Stability
+8. Orientation
+9. Momentum
 
 ### Example
-Raw: `RI:0.45, Stress:0.55, Social:1.0, Drive:0.62, Clarity:0.57, Joy:0.50`  
-Encoded: `[H5-4555M625750]`
+Raw: `RI:0.45, Str:0.55, War:1.0, Dri:0.62, Cla:0.57, Joy:0.50, Sta:0.80, Ori:0.60, Mom:0.15`
+Encoded: `[H9-4555M625750806015]`
 
 This tag is appended to historical turns in the LLM context.

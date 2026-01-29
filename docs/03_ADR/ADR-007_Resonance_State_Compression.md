@@ -1,35 +1,34 @@
-# ADR-007: Resonance State Compression Protocol
+# ADR-007: Resonance State Compression Protocol (H9)
 
 > **Status:** 🟢 ACCEPTED
-> **Date:** 2026-01-29
+> **Date:** 2026-01-30
 > **Context:** Token optimization for State History in LLM Context Window.
 
 ## Problem
-Passing full JSON state objects for every turn in the conversation history consumes excessive tokens (approx 200 tokens/turn). We need a way to preserve emotional history without bloating the context.
+Passing full JSON state objects consumes excessive tokens. We need a lossless compression for the full 9D Psychological Matrix.
 
 ## Solution
-Implement a **Lossless Semantic Compression Protocol** (Resonance Codec) for history entries.
+Implement **H9 Resonance Codec**.
 
-### Protocol Specification: H5
-Format: `[H5-{RI}{Stress}{Social}{Drive}{Clarity}{Joy}]`
+### Protocol Specification: H9
+Format: `[H9-{RI}{Str}{War}{Dri}{Cla}{Joy}{Sta}{Ori}{Mom}]`
+
+**Fields (9 Total):**
+1. **RI**: Resonance Index (Cognitive Alignment)
+2. **Str**: Stress (Core)
+3. **War**: Warmth (Core)
+4. **Dri**: Drive (Core)
+5. **Cla**: Clarity (Core)
+6. **Joy**: Joy (Core)
+7. **Sta**: Stability (Meta)
+8. **Ori**: Orientation (Meta)
+9. **Mom**: Momentum Intensity (Physics)
 
 **Encoding Rules:**
-1. **Precision:** 2 decimal places (0.00 - 1.00).
-2. **digits:** Map `0.XX` to `XX`. (e.g., `0.45` -> `45`).
-3. **Max Value:** `1.00` is mapped to character `M`.
-4. **Delimiters:** None (fixed width 2 chars per value, except M). 
-   *Correction:* If M is used, it replaces the 2 digits.
-   *Variant:* User example `4555M625750` suggests variable width or M stands for 100?
-   User Example: `RI:0.45, St:0.55, So:1.0, Dr:0.62, Cl:0.57, Jo:0.50` -> `4555M625750`
-   - 45 (RI)
-   - 55 (St)
-   - M (So) -> 1 char replacing 2? Or represents "Max"?
-   - 62 (Dr)
-   - 57 (Cl)
-   - 50 (Jo)
-
-**Decoding Key (System Prompt):**
-> "State Code [H5]: RI,Stress,Social,Drive,Clarity,Joy. Digits=0.xx, M=1.0."
+- Precision: 2 decimal places (0.XX -> XX).
+- Max: 1.0 -> M.
+- Length: Fixed 18 chars (or 9 chars if using M).
+- Example: `[H9-4555M625750806015]`
 
 ### Benefits (Benefit²)
 1. **Compression:** Reduces ~100 chars to ~15 chars (~85% saving).
