@@ -4,6 +4,8 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from orchestrator.cim.context_library_loader import ContextLibraryLoader
+
 
 @dataclass
 class ContextBundle:
@@ -41,21 +43,34 @@ class CIMEngine:
         self,
         system_identity: str = "",
         max_memory_items: int = 5,
-        max_context_tokens: int = 4000
+        max_context_tokens: int = 4000,
+        library_path: str = "context_library"
     ):
         """
         Initialize CIM.
 
         Args:
-            system_identity: Core system prompt
+            system_identity: Core system prompt (if not using library)
             max_memory_items: Max memories to include
             max_context_tokens: Token budget for context
+            library_path: Path to context_library folder
         """
-        self._system_identity = system_identity
         self._max_memory_items = max_memory_items
         self._max_context_tokens = max_context_tokens
         self._msp = None
         self._bus = None
+
+        # Initialize context library loader
+        self._library = ContextLibraryLoader(library_path)
+
+        # Load identity from library or use provided string
+        if system_identity:
+            self._system_identity = system_identity
+        else:
+            self._system_identity = self._library.load_identity()
+
+        # Load prompt fragments
+        self._prompts = self._library.load_prompts()
 
     def set_msp(self, msp) -> None:
         """Set MSP reference for memory retrieval."""

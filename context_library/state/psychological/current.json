@@ -1,0 +1,12 @@
+{
+    "timestamp": "2026-01-29T23:22:00+07:00",
+    "emotions": {
+        "valence": 0.7,
+        "arousal": 0.4,
+        "dominance": 0.6
+    },
+    "mood": "calm_engaged",
+    "primary_emotion": "curiosity",
+    "secondary_emotion": "contentment",
+    "source": "mock_matrix_provider"
+}

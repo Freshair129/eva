@@ -1,0 +1,17 @@
+{
+    "timestamp": "2026-01-29T23:22:00+07:00",
+    "hormones": {
+        "oxytocin": 0.6,
+        "cortisol": 0.2,
+        "dopamine": 0.5,
+        "serotonin": 0.7,
+        "adrenaline": 0.1,
+        "melatonin": 0.3
+    },
+    "vitals": {
+        "heart_rate": 72,
+        "energy_level": 0.8,
+        "fatigue": 0.2
+    },
+    "source": "mock_physio_provider"
+}
