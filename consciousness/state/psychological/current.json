@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-01-29T20:54:57.230111+00:00",
+  "timestamp": "2026-01-29T21:04:36.144045+00:00",
   "emotions": {
-    "valence": 0.171,
-    "arousal": 0.171,
-    "dominance": 0.171
+    "valence": 0.084,
+    "arousal": 0.084,
+    "dominance": 0.084
   },
   "axes_9d": {
-    "stress": 0.171,
-    "warmth": 0.171,
-    "drive": 0.171,
-    "clarity": 0.171,
-    "joy": 0.171,
+    "stress": 0.084,
+    "warmth": 0.084,
+    "drive": 0.084,
+    "clarity": 0.084,
+    "joy": 0.084,
     "stability": 0.5,
     "orientation": 0.5,
     "primary": "stress",
@@ -20,7 +20,7 @@
   "primary_emotion": "stress",
   "secondary_emotion": "warmth",
   "momentum": {
-    "intensity": 0.157
+    "intensity": 0.141
   },
   "source": "eva_matrix_system"
 }

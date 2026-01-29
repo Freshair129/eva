@@ -7,7 +7,9 @@ from pathlib import Path
 from contracts.ports.i_memory_storage import IMemoryStorage
 from msp.storage.file_memory_store import FileMemoryStore
 from msp.storage.chroma_store import ChromaMemoryStore
+from msp.storage.chroma_store import ChromaMemoryStore
 from msp.crosslink_manager import CrosslinkManager
+from msp.modules.distiller import WisdomDistiller
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +24,7 @@ class MSPEngine(IMemoryStorage):
         self.file_store = FileMemoryStore(base_dir=str(self.base_dir))
         self.vector_store = ChromaMemoryStore(persist_directory=str(self.base_dir / "vector_db"))
         self.crosslink_manager = CrosslinkManager(storage=self)
+        self.distiller = WisdomDistiller(self)
 
     def store(self, memory_data: Dict[str, Any]) -> str:
         """

@@ -84,15 +84,14 @@ class CIMEngine:
         """Update system identity prompt."""
         self._system_identity = identity
 
+    def set_gks(self, gks) -> None:
+        """Set GKS reference for wisdom retrieval."""
+        self._gks = gks
+
     def build_context(self, user_input: str) -> ContextBundle:
         """
         Build context bundle for given user input.
-
-        Args:
-            user_input: The user's message
-
-        Returns:
-            ContextBundle with all assembled context
+        Now includes Knowledge (GKS) and Experience (RMS).
         """
         # Start with user input
         bundle = ContextBundle(
@@ -100,21 +99,28 @@ class CIMEngine:
             system_identity=self._system_identity
         )
 
-        # Add memories if MSP available
+        # 1. Add Memories (Personal)
         if self._msp:
             try:
-                # MSPEngine has semantic_search(query, limit)
                 memories = self._msp.semantic_search(user_input, limit=self._max_memory_items)
-                bundle.memory_context = [
-                    self._format_memory(m) for m in memories
-                ]
+                bundle.memory_context = [self._format_memory(m) for m in memories]
             except Exception:
                 pass
 
-        # Add state if Bus available
-        if self._bus:
-            bundle.state_context = self._gather_state()
+        # 2. Add Knowledge (Wisdom)
+        if hasattr(self, "_gks") and self._gks:
+             try:
+                 knowledge = self._gks.query(user_input)
+                 # Inject into state context for now, or new field?
+                 # Let's put it in state for generic handling in format_for_llm
+                 bundle.state_context["knowledge"] = knowledge
+             except Exception:
+                 pass
 
+        # 3. Add State (Body, Mind, Perception)
+        if self._bus:
+            bundle.state_context.update(self._gather_state())
+        
         return bundle
 
     def _format_memory(self, memory: Any) -> Dict[str, Any]:
@@ -126,9 +132,11 @@ class CIMEngine:
         return {"content": str(memory)}
 
     def _gather_state(self) -> Dict[str, Any]:
-        """Gather current state from bus channels."""
+        """
+        Gather current state from bus channels.
+        Includes Phase 5 (Qualia) and Phase 4 (Physio).
+        """
         state = {}
-
         if not self._bus:
             return state
 
@@ -136,7 +144,6 @@ class CIMEngine:
         channels = ["bus:physical", "bus:psychological", "bus:phenomenological"]
         for channel in channels:
             try:
-                # IBus has get_latest(channel) from P0-004
                 latest = self._bus.get_latest(channel)
                 if latest:
                     state[channel] = latest
