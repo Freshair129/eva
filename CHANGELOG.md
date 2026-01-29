@@ -9,6 +9,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 4: Biology
+- **PhysioCore v0.1.0**: Biological Subsystem
+- **Hormone System**: 12 key hormones (Dopamine, Cortisol, etc.) with decay logic
+- **Circulatory System**: 30Hz Simulation Loop & Heartbeat
+- **Bio-Digital Gap**: Dynamic latency based on physiological state
+- **PhysioProvider**: Bus integration for biological signals (`bus:physical`)
+
 ### Phase 3: Psychology
 - **E9 Resonance Codec**: State compression (10 fields: RI + 9 psychological variables)
 - **EVA Matrix v0.1.0**: 5+2+2 emotional model with state persistence

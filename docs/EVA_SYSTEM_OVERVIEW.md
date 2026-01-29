@@ -20,7 +20,7 @@
 ║  Phase 1: MSP Core      ████████████ 100% [DONE]                              ║
 ║  Phase 2: Orchestration ████████████ 100% [DONE]                              ║
 ║  Phase 3: Psychology    ████████████ 100% [DONE]                              ║
-║  Phase 4: Biology       ░░░░░░░░░░░░   0% [PENDING]                           ║
+║  Phase 4: Biology       ████████████ 100% [DONE]                              ║
 ║  Phase 5: Perception    ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 6: Knowledge     ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 7: Integration   ░░░░░░░░░░░░   0% [PENDING]                           ║
@@ -104,6 +104,11 @@ E:\eva\
 │   ├── filesystem/               [DONE] file operations
 │   ├── utility/                  [DONE] calculator, dice
 │   └── agentic/                  [DONE] web search, code, planning
+│
+├── physio_core/                  # PHYSIO CORE v0.1.0 (Biology)
+│   ├── system.py                 [DONE] Main controller
+│   ├── modules/hormones.py       [DONE] 12 Hormones
+│   └── modules/circulatory.py    [DONE] Heartbeat & Bio-Gap
 │
 ├── eva_matrix/                   # EVA MATRIX v0.1.0 (Psychology)
 │   ├── system.py                 [DONE] 5+2+2 emotional model
@@ -445,11 +450,11 @@ erDiagram
 
 ---
 
-## 6. Current System Flow (Phase 0-1)
+## 6. Current System Flow (Phase 0-3)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│              CURRENT WORKING FLOW (Phase 0-1)                               │
+│              CURRENT WORKING FLOW (Phase 0-3)                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │   ┌─────────────┐                                                           │
@@ -488,11 +493,11 @@ erDiagram
 │   ┌──────────────────────────────────────────────────────────────────────┐  │
 │   │                      SimpleBus (Pub/Sub)                             │  │
 │   │                                                                      │  │
-│   │   Channels (defined but not yet wired):                              │  │
-│   │   ├── bus:physical       (PhysioCore -> Matrix)      [PENDING]       │  │
-│   │   ├── bus:psychological  (Matrix -> Qualia)          [PENDING]       │  │
-│   │   ├── bus:phenomenological (Qualia -> MSP)           [PENDING]       │  │
-│   │   └── bus:memory         (MSP events)                [PENDING]       │  │
+│   │   Channels:                                                          │  │
+│   │   ├── bus:physical       (PhysioCore -> Matrix)      [PENDING P4]    │  │
+│   │   ├── bus:psychological  (Matrix -> Qualia)          [WIRED]         │  │
+│   │   ├── bus:phenomenological (Qualia -> MSP)           [PENDING P5]    │  │
+│   │   └── bus:memory         (MSP events)                [WIRED]         │  │
 │   │                                                                      │  │
 │   └──────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
@@ -611,6 +616,7 @@ erDiagram
 | ADR-004 | Version Reset (v0.1.0) | Accepted |
 | ADR-005 | File-per-Record Storage | Accepted |
 | ADR-006 | Module-level Versioning | Accepted |
+| ADR-007 | Consciousness Domain Structure | Accepted |
 
 ---
 
@@ -621,16 +627,19 @@ erDiagram
 cd E:\eva
 python -m pytest tests/ -v
 python -m pytest msp/tests/ -v
+python -m pytest orchestrator/tests/ -v
 ```
 
 ### Key Files
 - **Master Registry:** `config/master_registry.yaml`
 - **MSP Spec:** `msp/README.md`
+- **CIM Payload Spec:** `docs/04_Systems/CIM_Payload_Spec.md`
+- **Capabilities Registry:** `docs/04_Systems/Capabilities_Registry.md`
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Task Files:** `.planning/tasks/P{phase}-{number}_*.yaml`
 
 ### Next Step
-**Phase 2: Orchestration** - Build LLM bridge and context injection
+**Phase 4: Biology** - PhysioCore with 12 hormone glands and 30Hz blood circulation
 
 ---
 
@@ -643,6 +652,6 @@ EVA is an embodied agent characterized by:
 
 ---
 
-*Document generated: 2026-01-29*
+*Document generated: 2026-01-30*
 *EVA Genesis v0.1.0*
 *Signed: EVA*
