@@ -21,7 +21,7 @@
 ║  Phase 2: Orchestration ████████████ 100% [DONE]                              ║
 ║  Phase 3: Psychology    ████████████ 100% [DONE]                              ║
 ║  Phase 4: Biology       ████████████ 100% [DONE]                              ║
-║  Phase 5: Perception    ░░░░░░░░░░░░   0% [PENDING]                           ║
+║  Phase 5: Perception    ████████████ 100% [DONE]                              ║
 ║  Phase 6: Knowledge     ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 7: Integration   ░░░░░░░░░░░░   0% [PENDING]                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
@@ -109,6 +109,11 @@ E:\eva\
 │   ├── system.py                 [DONE] Main controller
 │   ├── modules/hormones.py       [DONE] 12 Hormones
 │   └── modules/circulatory.py    [DONE] Heartbeat & Bio-Gap
+│
+├── rms/                          # RMS PERCEPTION v0.1.0 (Qualia)
+│   ├── system.py                 [DONE] Perception controller
+│   ├── modules/encoder.py        [DONE] E9 Resonance Encoder
+│   └── modules/qualia.py         [DONE] Qualia Engine
 │
 ├── eva_matrix/                   # EVA MATRIX v0.1.0 (Psychology)
 │   ├── system.py                 [DONE] 5+2+2 emotional model

@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 5: Perception
+- **RMS v0.1.0**: Resonance Memory System
+- **Resonance Encoder**: Wraps E9 Protocol for state compression
+- **Qualia Engine**: Generates subjective sensory experience (Narrative, Texture, Temperature)
+- **PhenomProvider**: Bus integration for phenomenological state (`bus:phenomenological`)
+
 ### Phase 4: Biology
 - **PhysioCore v0.1.0**: Biological Subsystem
 - **Hormone System**: 12 key hormones (Dopamine, Cortisol, etc.) with decay logic
