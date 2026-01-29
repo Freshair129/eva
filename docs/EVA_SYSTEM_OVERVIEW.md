@@ -92,7 +92,8 @@ E:\eva\
 │
 ├── docs/
 │   ├── 03_ADR/                   [DONE] 6 Architecture Decision Records
-│   └── 04_Systems/               [DONE] CIM Payload Spec (v0.1.0)
+│   ├── 04_Systems/               [DONE] CIM Payload Spec (v0.1.0)
+│   │                             [DONE] Capabilities Registry (v0.1.0)
 │
 ├── memory/                       # Runtime storage (created dynamically)
 ├── consciousness/                # Runtime state (Phase 7)
