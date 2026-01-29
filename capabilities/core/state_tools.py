@@ -64,3 +64,45 @@ class E9ResonanceCodec:
 def compress_state(state: Dict[str, float]) -> str:
     """Public tool function to compress state."""
     return E9ResonanceCodec.encode(state)
+
+
+def introspect_state(bus=None) -> Dict[str, Any]:
+    """
+    Returns detailed internal state (Bio/Psych/Qualia).
+    Security Level: L1 (Safe - Auto-execute)
+    
+    Args:
+        bus: IBus instance (injected at runtime)
+        
+    Returns:
+        Dictionary containing:
+        - physical: PhysioCore state (hormones, vitals)
+        - psychological: EVA Matrix state (9D emotions)
+        - phenomenological: Qualia state (sensory experience)
+        - timestamp: Current timestamp
+    """
+    from datetime import datetime, timezone
+    
+    result = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "physical": {},
+        "psychological": {},
+        "phenomenological": {}
+    }
+    
+    if bus is None:
+        return result
+    
+    # Gather from known channels
+    channels = {
+        "bus:physical": "physical",
+        "bus:psychological": "psychological", 
+        "bus:phenomenological": "phenomenological"
+    }
+    
+    for channel, key in channels.items():
+        data = bus.get_latest(channel)
+        if data:
+            result[key] = data
+            
+    return result
