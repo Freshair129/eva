@@ -1,0 +1,179 @@
+"""CIM Engine - Context Injection Manager."""
+
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass, field
+from datetime import datetime
+
+
+@dataclass
+class ContextBundle:
+    """
+    Bundle of context to inject into LLM.
+
+    Attributes:
+        user_input: The user's message
+        system_identity: Core identity prompt
+        memory_context: Retrieved memories
+        state_context: Current bio/psych state
+        timestamp: When bundle was created
+    """
+    user_input: str
+    system_identity: str = ""
+    memory_context: List[Any] = field(default_factory=list)
+    state_context: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
+
+
+class CIMEngine:
+    """
+    Context Injection Manager.
+
+    Assembles context from multiple sources into a coherent
+    bundle for LLM consumption.
+
+    Responsibilities:
+    - Gather context from sources
+    - Format for LLM consumption
+    - Manage context size limits
+    """
+
+    def __init__(
+        self,
+        system_identity: str = "",
+        max_memory_items: int = 5,
+        max_context_tokens: int = 4000
+    ):
+        """
+        Initialize CIM.
+
+        Args:
+            system_identity: Core system prompt
+            max_memory_items: Max memories to include
+            max_context_tokens: Token budget for context
+        """
+        self._system_identity = system_identity
+        self._max_memory_items = max_memory_items
+        self._max_context_tokens = max_context_tokens
+        self._msp = None
+        self._bus = None
+
+    def set_msp(self, msp) -> None:
+        """Set MSP reference for memory retrieval."""
+        self._msp = msp
+
+    def set_bus(self, bus) -> None:
+        """Set Bus reference for state retrieval."""
+        self._bus = bus
+
+    def set_system_identity(self, identity: str) -> None:
+        """Update system identity prompt."""
+        self._system_identity = identity
+
+    def build_context(self, user_input: str) -> ContextBundle:
+        """
+        Build context bundle for given user input.
+
+        Args:
+            user_input: The user's message
+
+        Returns:
+            ContextBundle with all assembled context
+        """
+        # Start with user input
+        bundle = ContextBundle(
+            user_input=user_input,
+            system_identity=self._system_identity
+        )
+
+        # Add memories if MSP available
+        if self._msp:
+            try:
+                # MSPEngine has semantic_search(query, limit)
+                memories = self._msp.semantic_search(user_input, limit=self._max_memory_items)
+                bundle.memory_context = [
+                    self._format_memory(m) for m in memories
+                ]
+            except Exception:
+                pass
+
+        # Add state if Bus available
+        if self._bus:
+            bundle.state_context = self._gather_state()
+
+        return bundle
+
+    def _format_memory(self, memory: Any) -> Dict[str, Any]:
+        """Format a memory for context injection."""
+        if hasattr(memory, 'to_dict'):
+            return memory.to_dict()
+        if isinstance(memory, dict):
+            return memory
+        return {"content": str(memory)}
+
+    def _gather_state(self) -> Dict[str, Any]:
+        """Gather current state from bus channels."""
+        state = {}
+
+        if not self._bus:
+            return state
+
+        # Get latest from known channels
+        channels = ["bus:physical", "bus:psychological", "bus:phenomenological"]
+        for channel in channels:
+            try:
+                # IBus has get_latest(channel) from P0-004
+                latest = self._bus.get_latest(channel)
+                if latest:
+                    state[channel] = latest
+            except Exception:
+                pass
+
+        return state
+
+    def format_for_llm(self, bundle: ContextBundle) -> str:
+        """
+        Format bundle as text for LLM.
+
+        Args:
+            bundle: The context bundle
+
+        Returns:
+            Formatted string for LLM system prompt
+        """
+        parts = []
+
+        # System identity
+        if bundle.system_identity:
+            parts.append(f"# Identity\n{bundle.system_identity}")
+
+        # State context
+        if bundle.state_context:
+            parts.append("# Current State")
+            for channel, data in bundle.state_context.items():
+                parts.append(f"## {channel}\n{data}")
+
+        # Memory context
+        if bundle.memory_context:
+            parts.append("# Relevant Memories")
+            for mem in bundle.memory_context:
+                # Try to get a summary or content
+                content = ""
+                if isinstance(mem, dict):
+                    # Episodic has summary.content
+                    summary = mem.get("summary", {})
+                    if isinstance(summary, dict):
+                        content = summary.get("content", "")
+                    else:
+                        content = str(summary)
+                    
+                    if not content:
+                        content = mem.get("content", "")
+                
+                if not content:
+                    content = str(mem)
+                
+                # Limit length for context
+                excerpt = content[:200] + "..." if len(content) > 200 else content
+                parts.append(f"- {excerpt}")
+
+        return "\n\n".join(parts)

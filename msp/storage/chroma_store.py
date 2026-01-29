@@ -30,6 +30,10 @@ class ChromaMemoryStore(IMemoryStorage):
             name="memory_episodes",
             metadata={"hnsw:space": "cosine"}
         )
+        self.semantic_collection = self.client.get_or_create_collection(
+            name="memory_semantic",
+            metadata={"hnsw:space": "cosine"}
+        )
 
     def store(self, memory_data: Dict[str, Any]) -> str:
         """
@@ -53,13 +57,18 @@ class ChromaMemoryStore(IMemoryStorage):
             collection = self.episodes_collection
             # For episodes, we embed the summary content
             if "summary" in memory_data and isinstance(memory_data["summary"], dict):
-                text_content = memory_data["summary"].get("action_taken", "") + " " + \
-                               memory_data["summary"].get("key_outcome", "")
+                text_content = (memory_data["summary"].get("content", "") + " " +
+                               memory_data["summary"].get("action_taken", "") + " " + 
+                               memory_data["summary"].get("key_outcome", ""))
+        elif m_type == "semantic":
+            collection = self.semantic_collection
+            # Format subject-predicate-object
+            text_content = f"{memory_data.get('subject', '')} {memory_data.get('predicate', '')} {memory_data.get('object', '')}"
         else:
             # Skip non-textual or unindexed types for now
             return m_id
 
-        if not text_content:
+        if not text_content or not text_content.strip():
             logger.warning(f"No text content to embed for {m_id}")
             return m_id
 
@@ -73,8 +82,8 @@ class ChromaMemoryStore(IMemoryStorage):
 
     def retrieve(self, memory_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve by ID from vector DB (returns metadata)."""
-        # Try both collections
-        for collection in [self.turns_collection, self.episodes_collection]:
+        # Try all collections
+        for collection in [self.turns_collection, self.episodes_collection, self.semantic_collection]:
             res = collection.get(ids=[memory_id])
             if res["ids"]:
                 return res["metadatas"][0]
@@ -82,9 +91,13 @@ class ChromaMemoryStore(IMemoryStorage):
 
     def query(self, filters: Dict[str, Any], limit: int = 10) -> List[Dict[str, Any]]:
         """Queries metadata in ChromaDB."""
-        # Simple metadata filtering
-        res = self.turns_collection.get(where=filters, limit=limit)
-        return res["metadatas"]
+        # Simple metadata filtering - search all and combine
+        results = []
+        for collection in [self.turns_collection, self.episodes_collection, self.semantic_collection]:
+            res = collection.get(where=filters, limit=limit)
+            if res["metadatas"]:
+                results.extend(res["metadatas"])
+        return results[:limit]
 
     def semantic_search(
         self, 
@@ -92,24 +105,30 @@ class ChromaMemoryStore(IMemoryStorage):
         limit: int = 10, 
         filters: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
-        """Performs vector similarity search."""
-        # Search turns by default as they contain most text
-        res = self.turns_collection.query(
-            query_texts=[query_text],
-            n_results=limit,
-            where=filters
-        )
+        """Performs vector similarity search across all collections."""
+        all_results = []
         
-        # Format results: combine ID and metadata
-        output = []
-        if res["ids"] and res["ids"][0]:
-            for i in range(len(res["ids"][0])):
-                item = res["metadatas"][0][i]
-                item["_distance"] = res["distances"][0][i]
-                item["_id"] = res["ids"][0][i]
-                output.append(item)
+        for collection in [self.turns_collection, self.episodes_collection, self.semantic_collection]:
+            try:
+                res = collection.query(
+                    query_texts=[query_text],
+                    n_results=limit,
+                    where=filters
+                )
+                
+                if res["ids"] and res["ids"][0]:
+                    for i in range(len(res["ids"][0])):
+                        item = res["metadatas"][0][i]
+                        item["_distance"] = res["distances"][0][i]
+                        item["_id"] = res["ids"][0][i]
+                        all_results.append(item)
+            except Exception as e:
+                logger.error(f"Search failed in collection {collection.name}: {e}")
+
+        # Sort combined results by distance (lower is better for cosine)
+        all_results.sort(key=lambda x: x.get("_distance", 1.0))
         
-        return output
+        return all_results[:limit]
 
     def delete(self, memory_id: str) -> bool:
         """Removes record from vector DB."""
