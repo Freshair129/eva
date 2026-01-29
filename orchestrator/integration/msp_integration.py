@@ -36,12 +36,11 @@ class MSPIntegration:
         user_input: str,
         response: str,
         context_id: str = "sess_default",
-        interaction_mode: str = "deep_discussion"
+        interaction_mode: str = "deep_discussion",
+        state_snapshot: Dict[str, Any] = None
     ) -> str:
         """
         Store a conversation turn as a simplified episodic memory.
-        Note: In Phase 2, we store each turn as a mini-episode for simplicity,
-        or we could group them. Here we follow the spec's intent.
         """
         
         # Create a structured summary
@@ -69,7 +68,8 @@ class MSPIntegration:
             episode_id=ep_id,
             situation_context=context,
             summary=summary,
-            tags=["conversation", context_id]
+            tags=["conversation", context_id],
+            state_snapshot=state_snapshot or {}
         )
         
         # Set raw content if we want full history in the file
@@ -155,8 +155,23 @@ class IntegratedOrchestrator:
         # 3. Extract facts from user input (Semantic)
         fact_ids = self._integration.extract_facts(user_input)
 
-        # 4. Store the interaction (Episodic)
-        episode_id = self._integration.store_turn(user_input, response.content)
+        # 4. Gather state snapshot if available
+        state_snapshot = {}
+        if self._bus_integration and self._bus_integration._bus:
+             # Basic state gathering from known channels
+             # In future, use CIM's gather_state logic or similar
+             channels = ["bus:physical", "bus:psychological", "bus:phenomenological"]
+             for ch in channels:
+                 val = self._bus_integration._bus.get_latest(ch)
+                 if val:
+                     state_snapshot[ch] = val
+
+        # 5. Store the interaction (Episodic)
+        episode_id = self._integration.store_turn(
+            user_input, 
+            response.content,
+            state_snapshot=state_snapshot
+        )
         
         # 5. Publish turn completed
         if self._bus_integration:
