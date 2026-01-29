@@ -3,7 +3,7 @@
 > **Version:** v0.1.0 (Genesis)
 > **Architecture:** Ports & Adapters (Hexagonal)
 > **Approach:** Walking Skeleton
-> **Last Updated:** 2026-01-29
+> **Last Updated:** 2026-01-30
 
 ---
 
@@ -19,7 +19,7 @@
 ║  Phase 0: Foundation    ████████████ 100% [DONE]                              ║
 ║  Phase 1: MSP Core      ████████████ 100% [DONE]                              ║
 ║  Phase 2: Orchestration ████████████ 100% [DONE]                              ║
-║  Phase 3: Psychology    ░░░░░░░░░░░░   0% [PENDING]                           ║
+║  Phase 3: Psychology    ████████████ 100% [DONE]                              ║
 ║  Phase 4: Biology       ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 5: Perception    ░░░░░░░░░░░░   0% [PENDING]                           ║
 ║  Phase 6: Knowledge     ░░░░░░░░░░░░   0% [PENDING]                           ║
@@ -98,6 +98,17 @@ E:\eva\
 │
 ├── memory/                       # Runtime storage (created dynamically)
 ├── consciousness/                # Runtime state (Phase 7)
+│
+├── capabilities/                 # CAPABILITIES v0.1.0 (23 Tools)
+│   ├── core/                     [DONE] time, memory, state tools
+│   ├── filesystem/               [DONE] file operations
+│   ├── utility/                  [DONE] calculator, dice
+│   └── agentic/                  [DONE] web search, code, planning
+│
+├── eva_matrix/                   # EVA MATRIX v0.1.0 (Psychology)
+│   ├── system.py                 [DONE] 5+2+2 emotional model
+│   ├── modules/psych_engine.py   [DONE] State transitions
+│   └── configs/                  [DONE] Axis & mood dynamics
 │
 ├── PROJECT.md                    [DONE] Project overview
 ├── CHANGELOG.md                  [DONE] Version history

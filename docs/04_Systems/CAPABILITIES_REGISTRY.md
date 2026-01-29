@@ -2,88 +2,131 @@
 
 > **Module:** Capabilities (The "Hands" of EVA)
 > **Purpose:** Defines all tools available to the LLM.
-> **Status:** ⚠️ DRAFT
+> **Status:** ✅ IMPLEMENTED (v0.1.0)
+> **Total Tools:** 23
 
 ---
 
-## 1. Core Cognitive Tools (Survival Tier)
+## 1. Core Cognitive Tools (L1 - Auto-execute)
 
-These tools are essential for the agent to function as a continuous entity.
+Essential tools for the agent to function as a continuous entity.
 
-| Tool Name | Description | Python Signature |
-|-----------|-------------|------------------|
-| `recall_memory` | Retrieves relevant episodic or semantic memories. | `recall_memory(query: str, type: str = "all", limit: int = 5) -> List[Dict]` |
-| `save_memory` | Explicitly saves a new memory or fact. | `save_memory(content: str, type: str = "episodic", importance: float = 0.5) -> str` |
-| `introspect_state` | Returns the detailed internal state (Bio/Psych/Qualia). | `introspect_state() -> Dict` |
-| `get_time` | Returns current date, time, and timezone. | `get_time() -> str` |
-| `compress_state` | Encodes state dict to E9 string. | `compress_state(state: Dict) -> str` |
-
----
-
-## 2. Interaction & Utility Tools (Functional Tier)
-
-Basic utilities to enhance accuracy and capability.
-
-| Tool Name | Description | Python Signature |
-|-----------|-------------|------------------|
-| `calculator` | Performs mathematical calculations safely. | `calculator(expression: str) -> float` |
-| `calendar_check` | Checks usage of time/appointments (if implemented). | `calendar_check(date: str) -> List[Event]` |
-| `random_number` | Generates randomness (for decisions/games). | `random_number(min: int, max: int) -> int` |
+| Tool | Description | Module |
+|------|-------------|--------|
+| `recall_memory` | Retrieves episodic/semantic memories | `core.memory_tools` |
+| `save_memory` | Saves new memory or fact | `core.memory_tools` |
+| `introspect_state` | Returns Bio/Psych/Qualia state | `core.state_tools` |
+| `compress_state` | Encodes state to E9 string | `core.state_tools` |
+| `get_time` | Returns datetime with timezone | `core.time_tools` |
+| `get_timestamp` | Returns Unix timestamp | `core.time_tools` |
+| `format_relative_time` | "2 hours ago" format | `core.time_tools` |
 
 ---
 
-## 3. File System Tools (The "Hands")
+## 2. Utility Tools (L1 - Auto-execute)
 
-Allows the agent to read/write files. **Requires careful permission handling.**
+Mathematical and random utilities.
 
-| Tool Name | Description | Python Signature |
-|-----------|-------------|------------------|
-| `read_file` | Reads content of a file (text/code). | `read_file(path: str) -> str` |
-| `write_file` | Creates or overwrites a file. | `write_file(path: str, content: str) -> bool` |
-| `list_files` | Lists files in a directory. | `list_files(path: str) -> List[str]` |
-| `make_directory` | Creates a new folder. | `make_directory(path: str) -> bool` |
-
----
-
-## 4. Advanced/Agentic Tools (Growth Tier)
-
-Tools for high-level operations.
-
-| Tool Name | Description | Python Signature |
-|-----------|-------------|------------------|
-| `web_search` | Searches the internet (via Serper/Google). | `web_search(query: str) -> List[Result]` |
-| `plan_task` | Decomposes a goal into subtasks. | `plan_task(goal: str) -> List[Step]` |
-| `generate_image` | Creates images from descriptions. | `generate_image(prompt: str) -> ImageURL` |
-| `run_python` | Executes Python code in a sandbox. | `run_python(code: str) -> str` |
+| Tool | Description | Module |
+|------|-------------|--------|
+| `calculator` | Safe math expressions (sqrt, sin, pi) | `utility.math_tools` |
+| `random_number` | Random integer in range | `utility.math_tools` |
+| `random_choice` | Pick random from list | `utility.math_tools` |
+| `dice_roll` | Simulate dice (e.g., 2d6) | `utility.math_tools` |
 
 ---
 
-## 5. Security & Permissions
+## 3. File System Tools (L1/L2)
+
+File operations with sandbox protections.
+
+| Tool | Security | Description | Module |
+|------|----------|-------------|--------|
+| `read_file` | L1 | Read file content | `filesystem.file_ops` |
+| `list_files` | L1 | List directory contents | `filesystem.file_ops` |
+| `write_file` | **L2** | Create/overwrite file | `filesystem.file_ops` |
+| `make_directory` | **L2** | Create folder | `filesystem.file_ops` |
+| `delete_file` | **L2** | Delete file | `filesystem.file_ops` |
+
+---
+
+## 4. Agentic Tools (L1/L3)
+
+Advanced operations for autonomous behavior.
+
+| Tool | Security | Description | Module |
+|------|----------|-------------|--------|
+| `web_search` | **L3** | Search internet (DDG/Serper) | `agentic.web_tools` |
+| `fetch_url` | **L3** | Fetch URL content | `agentic.web_tools` |
+| `run_python` | **L3** | Execute Python (sandbox) | `agentic.code_tools` |
+| `evaluate_expression` | L1 | Safe expression eval | `agentic.code_tools` |
+| `plan_task` | L1 | Decompose goal to steps | `agentic.planning_tools` |
+| `track_progress` | L1 | Update plan progress | `agentic.planning_tools` |
+| `reflect_on_task` | L1 | Record lessons learned | `agentic.planning_tools` |
+
+---
+
+## 5. Security Levels
 
 > [!IMPORTANT]
-> **Sandboxing Policy:** Dangerous tools MUST require explicit user confirmation before execution.
+> L2/L3 tools require `_confirmed=True` to execute.
 
-| Security Level | Description | Behavior |
-|----------------|-------------|----------|
+| Level | Description | Behavior |
+|-------|-------------|----------|
 | **L1: Safe** | Read-only, internal state | Auto-executed |
-| **L2: Destructive** | File writing, deletion | **Requires Confirmation** |
-| **L3: Remote/Code** | Web access, Python execution | **Requires Confirmation + Sandbox** |
+| **L2: Destructive** | File writing, deletion | Requires Confirmation |
+| **L3: Remote/Code** | Web access, code execution | Requires Confirmation + Sandbox |
 
 ---
 
-## Implementation Structure
+## 6. Sandbox Protections
 
-Each tool will be implemented as a class in `e:\eva\capabilities\`:
+```python
+# File System
+ALLOWED_EXTENSIONS = {".txt", ".md", ".json", ".yaml", ".yml", ".py", ".js", ".html", ".css"}
+MAX_FILE_SIZE = 1MB
+FORBIDDEN_PATHS = {"C:\\Windows", "/etc", "/usr"}
+
+# Code Execution
+BLOCKED_IMPORTS = {"os", "sys", "subprocess", "socket", ...}
+ALLOWED_MODULES = {"math", "random", "datetime", "json", "re", ...}
+```
+
+---
+
+## 7. Implementation Structure
 
 ```
 e:\eva\capabilities\
+├── __init__.py              # Package exports
 ├── core\
-│   ├── memory_tools.py      # [L1] recall_memory, save_memory
-│   ├── time_tools.py        # [L1] get_time
-│   └── state_tools.py       # [L1] introspect_state
+│   ├── memory_tools.py      # [L1] recall/save
+│   ├── time_tools.py        # [L1] time utilities
+│   └── state_tools.py       # [L1] E9 codec, introspect
 ├── filesystem\
-│   └── file_ops.py          # [L1] read/list, [L2] write/mkdir
+│   └── file_ops.py          # [L1/L2] file operations
 ├── utility\
-│   └── math_tools.py        # [L1] calculator
-└── ...
+│   └── math_tools.py        # [L1] calculator, dice
+└── agentic\
+    ├── web_tools.py         # [L3] web search, fetch
+    ├── code_tools.py        # [L1/L3] python execution
+    └── planning_tools.py    # [L1] task planning
+```
+
+---
+
+## 8. Usage Example
+
+```python
+from capabilities import (
+    get_time, calculator, web_search, 
+    introspect_state, compress_state
+)
+
+# L1: Auto-execute
+print(get_time())  # "2026-01-30 00:48:00 (SE Asia Standard Time)"
+print(calculator("sqrt(16) + pi"))  # 7.14...
+
+# L3: Requires confirmation
+result = web_search("EVA AI", provider="duckduckgo", _confirmed=True)
 ```

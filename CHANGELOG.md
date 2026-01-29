@@ -9,6 +9,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 3: Psychology
+- **E9 Resonance Codec**: State compression (10 fields: RI + 9 psychological variables)
+- **EVA Matrix v0.1.0**: 5+2+2 emotional model with state persistence
+- **Capabilities System v0.1.0**: 23 tools across 4 tiers
+  - Core: time, memory, state (7 tools)
+  - File System: read, write, list (5 tools)
+  - Utility: calculator, dice (4 tools)
+  - Agentic: web_search, run_python, plan_task (7 tools)
+- **Web Search Integration**: DuckDuckGo (free) + Serper.dev support
+
 ### Phase 0: Foundation
 - Project structure setup
 - Core contracts definition
