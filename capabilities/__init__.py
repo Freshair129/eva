@@ -11,3 +11,8 @@ from .filesystem.file_ops import read_file, list_files, write_file, make_directo
 
 # Utility Tools (L1)
 from .utility.math_tools import calculator, random_number, random_choice, dice_roll
+
+# Agentic Tools (L1/L3)
+from .agentic.web_tools import web_search, fetch_url
+from .agentic.code_tools import run_python, evaluate_expression
+from .agentic.planning_tools import plan_task, track_progress, reflect_on_task
