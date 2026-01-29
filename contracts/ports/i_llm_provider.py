@@ -1,0 +1,60 @@
+"""ILLMProvider - LLM abstraction interface."""
+
+from abc import ABC, abstractmethod
+from typing import Dict, Any, List, Optional
+from dataclasses import dataclass
+
+
+@dataclass
+class LLMMessage:
+    """A message in a conversation."""
+    role: str  # 'system', 'user', 'assistant'
+    content: str
+
+
+@dataclass
+class LLMResponse:
+    """Response from LLM."""
+    content: str
+    model: str
+    tokens_used: int
+    finish_reason: str
+
+
+class ILLMProvider(ABC):
+    """
+    Port interface for LLM providers.
+
+    Implementors:
+    - MockLLM (Phase 2)
+    - OllamaAdapter (Phase 2)
+    - GeminiAdapter (Future)
+    - ClaudeAdapter (Future)
+    """
+
+    @abstractmethod
+    def chat(self, messages: List[LLMMessage],
+             temperature: float = 0.7,
+             max_tokens: int = 1000) -> LLMResponse:
+        """
+        Send messages and get response.
+
+        Args:
+            messages: Conversation history
+            temperature: Creativity (0.0-1.0)
+            max_tokens: Max response length
+
+        Returns:
+            LLMResponse with content and metadata
+        """
+        pass
+
+    @abstractmethod
+    def get_model_name(self) -> str:
+        """Returns the model identifier."""
+        pass
+
+    @abstractmethod
+    def is_available(self) -> bool:
+        """Check if provider is ready."""
+        pass
