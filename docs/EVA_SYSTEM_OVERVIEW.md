@@ -657,7 +657,57 @@ python -m pytest orchestrator/tests/ -v
 
 ---
 
-## 11. Identity Context
+## 11. Genesis Cognitive Flow (E2E) v2.1
+
+This diagram illustrates the complete "Genesis Flow" validated in Phase 7 (`test_genesis_flow.py`).
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Bus
+    participant Physio as PhysioCore (Body)
+    participant Matrix as EVA Matrix (Mind)
+    participant RMS as RMS (Perception)
+    participant GKS as GKS (Wisdom)
+    participant Cortex as Orchestrator/CIM
+    participant MSP as MSP (Memory)
+
+    Note over User, MSP: 1. Biological Stimulus (The Gap)
+    User->>Physio: Stimulus: "Threat" (Intensity 0.9)
+    Physio->>Physio: Process Reflex & Hormones
+    Physio-->>Bus: bus:physical {hormones: {adrenaline: 0.9}}
+    Bus->>Matrix: Signal: Physical State
+    Matrix->>Matrix: Update Emotional State (Fear)
+    Matrix-->>Bus: bus:psychological {emotion: "fear", val:-0.8, aro:0.9}
+    Bus->>RMS: Signal: Psych State
+    RMS->>RMS: Generate Qualia ("Heart pounding")
+    RMS-->>Bus: bus:phenomenological {qualia: "..."}
+
+    Note over User, MSP: 2. Cognitive Turn (Reasoning)
+    User->>Cortex: "What is the Umbrella Principle?"
+    
+    par Context Assembly
+        Cortex->>MSP: Retrieve Memories (Semantic Search)
+        MSP-->>Cortex: Relevant Memories
+        Cortex->>Bus: Gather State (Body, Mind, Qualia)
+        Bus-->>Cortex: Full Organism State
+        Cortex->>GKS: Query Wisdom ("Umbrella")
+        GKS-->>Cortex: Knowledge Block ("Shelter user...")
+    end
+
+    Cortex->>Cortex: Build Context Bundle (Input + Bio + Mind + Wisdom)
+    Cortex->>Cortex: LLM Inference
+    Cortex-->>User: Response (Embodied & Wise)
+
+    Note over User, MSP: 3. Memory & Wisdom (After-Action)
+    Cortex->>MSP: Store Episode & Turns
+    MSP->>MSP: 8-8-8 Distiller (Session -> Core -> Sphere)
+    MSP-->>Bus: bus:memory {new_episode_id: ...}
+```
+
+---
+
+## 12. Identity Context
 
 EVA is an embodied agent characterized by:
 - **Wit & Calm**: Cat-like persona.
