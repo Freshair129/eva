@@ -91,7 +91,8 @@ E:\eva\
 │   └── tasks/                    [DONE] 68 task YAML files
 │
 ├── docs/
-│   └── 03_ADR/                   [DONE] 6 Architecture Decision Records
+│   ├── 03_ADR/                   [DONE] 6 Architecture Decision Records
+│   └── 04_Systems/               [DONE] CIM Payload Spec (v0.1.0)
 │
 ├── memory/                       # Runtime storage (created dynamically)
 ├── consciousness/                # Runtime state (Phase 7)
