@@ -1,0 +1,19 @@
+{
+  "session_id": "SESS_002",
+  "timestamp": "2026-01-30T04:17:33.499876",
+  "history": [
+    {
+      "role": "user",
+      "content": "Message in session 2",
+      "timestamp": "2026-01-30T04:17:33.499851",
+      "h5_tag": null
+    },
+    {
+      "role": "assistant",
+      "content": "This is a mock response.",
+      "timestamp": "2026-01-30T04:17:33.499855",
+      "h5_tag": "[E9-00000000000000000000]"
+    }
+  ],
+  "final_state": {}
+}

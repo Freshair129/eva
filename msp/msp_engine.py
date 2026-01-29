@@ -89,5 +89,26 @@ class MSPEngine(IMemoryStorage):
         success_vector = self.vector_store.delete(memory_id)
         return success_file or success_vector
 
+    def snapshot_session(self, session_id: str, context: Dict[str, Any]):
+        """
+        Snapshots active consciousness context to Session Memory.
+        Implements 8-8-8 Tier 1 -> Tier 2 transition.
+        """
+        session_dir = self.base_dir / "session_memory"
+        session_dir.mkdir(parents=True, exist_ok=True)
+        
+        file_path = session_dir / f"session_{session_id}.json"
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                import json
+                json.dump(context, f, indent=2)
+            logger.info(f"Session {session_id} snapshotted to {file_path}")
+            
+            # Trigger 8-8-8 check
+            self.distiller.check_and_distill()
+            
+        except Exception as e:
+            logger.error(f"Failed to snapshot session {session_id}: {e}")
+
     def get_storage_type(self) -> str:
         return "unified_msp"

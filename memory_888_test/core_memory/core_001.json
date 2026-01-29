@@ -1,0 +1,23 @@
+{
+  "id": "core_001",
+  "type": "core_narrative",
+  "source_sessions": [
+    "session_SESS_001",
+    "session_SESS_002",
+    "session_SESS_003",
+    "session_SESS_004",
+    "session_SESS_005",
+    "session_SESS_006",
+    "session_SESS_007",
+    "session_SESS_008"
+  ],
+  "distillation": {
+    "summary": "Distilled narrative arc from 8 sessions.",
+    "pillars": [
+      "clean",
+      "summary",
+      "index",
+      "relation"
+    ]
+  }
+}

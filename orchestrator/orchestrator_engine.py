@@ -117,6 +117,36 @@ class OrchestratorEngine:
             model=llm_response.model,
             tokens_used=llm_response.tokens_used
         )
+            
+    def finalize_session(self, session_id: str):
+        """
+        Ends the current session and snapshots consciousness to MSP.
+        Triggers 8-8-8 distillation if thresholds are met.
+        """
+        if not self._msp:
+            logger.warning("No MSP available to finalize session.")
+            return
+
+        # Prepare Consciousness Snapshot
+        history_snapshot = []
+        for turn in self._conversation_history:
+            turn_data = turn.__dict__.copy()
+            if isinstance(turn_data.get("timestamp"), datetime):
+                turn_data["timestamp"] = turn_data["timestamp"].isoformat()
+            history_snapshot.append(turn_data)
+
+        snapshot = {
+            "session_id": session_id,
+            "timestamp": datetime.now().isoformat(),
+            "history": history_snapshot,
+            "final_state": self._cim._gather_state()
+        }
+        
+        # Trigger Snapshot in MSP
+        self._msp.snapshot_session(session_id, snapshot)
+        
+        # Clear local consciousness after snapshot (Volatile per spec)
+        self.clear_history()
 
     def _generate_h5_tag(self, state_context: Dict[str, Any]) -> Optional[str]:
         """Generate H5 tag from gathered state."""
