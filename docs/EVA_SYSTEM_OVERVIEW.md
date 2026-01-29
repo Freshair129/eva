@@ -534,19 +534,19 @@ erDiagram
 │  └── Tests: 8 verify_*.py files                                             │
 │       │                                                                     │
 │       ▼                                                                     │
-│  PHASE 2: ORCHESTRATION [PENDING] (10 tasks)                                │
-│  ├── ILLMProvider interface                                                 │
-│  ├── MockLLM, OllamaAdapter                                                 │
-│  ├── CIM (Context Injection Manager)                                        │
-│  ├── ContextBuilder                                                         │
-│  └── Orchestrator Engine                                                    │
+│  PHASE 2: ORCHESTRATION [DONE] (10 tasks)                                   │
+│  ├── OrchestratorEngine: Master coordinator                                │
+│  ├── CIM v0.1.0: Multi-source context assembly                             │
+│  ├── LLM Bridge: MockLLM + OllamaAdapter                                   │
+│  ├── MSP Integration: Automated memory persistence                         │
+│  └── Bus Integration: State/Event pub-sub                                  │
 │       │                                                                     │
 │       ▼                                                                     │
-│  PHASE 3: PSYCHOLOGY [PENDING] (8 tasks)                                    │
-│  ├── EVA Matrix directory                                                   │
-│  ├── 9D emotional dimensions                                                │
-│  ├── MatrixState schema                                                     │
-│  └── MatrixProvider (IStateProvider)                                        │
+│  PHASE 3: PSYCHOLOGY [DONE] (8 tasks)                                       │
+│  ├── EVA Matrix v0.1.0: 5+2+2 emotional model                              │
+│  ├── PsychEngine: State transitions                                        │
+│  ├── Capabilities: 23 tools (core, filesystem, utility, agentic)           │
+│  └── Consciousness: identity, state, knowledge, prompts                                        │
 │       │                                                                     │
 │       ▼                                                                     │
 │  PHASE 4: BIOLOGY [PENDING] (10 tasks)                                      │
@@ -590,8 +590,10 @@ erDiagram
 | **MSP Storage** | DONE | v0.2.0 | 2 backends |
 | **MSP Engine** | DONE | v0.4.1 | 2 files |
 | **Tests** | DONE | - | 9 test files |
-| **Orchestrator** | PENDING | Phase 2 | - |
-| **EVA Matrix** | PENDING | Phase 3 | - |
+| **Orchestrator** | DONE | v0.1.0 | orchestrator_engine.py, cim/, llm_bridge/, integration/ |
+| **EVA Matrix** | DONE | v0.1.0 | system.py, psych_engine.py, configs/ |
+| **Capabilities** | DONE | v0.1.0 | 23 tools (core, filesystem, utility, agentic) |
+| **Consciousness** | DONE | v0.1.0 | identity/, state/, knowledge/, prompts/ |
 | **PhysioCore** | PENDING | Phase 4 | - |
 | **Qualia/RMS** | PENDING | Phase 5 | - |
 | **GKS** | PENDING | Phase 6 | - |
