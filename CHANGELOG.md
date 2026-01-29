@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 6: Knowledge
+- **GKS v0.1.0**: Genesis Knowledge System
+- **GKS Loader**: Validates and loads Genesis Block JSONs
+- **Knowledge Graph**: Semantic network for concept linking
+- **GKSSystem**: Main controller for knowledge retrieval
+
 ### Phase 5: Perception
 - **RMS v0.1.0**: Resonance Memory System
 - **Resonance Encoder**: Wraps E9 Protocol for state compression

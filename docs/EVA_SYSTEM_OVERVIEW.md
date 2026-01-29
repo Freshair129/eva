@@ -22,7 +22,7 @@
 ║  Phase 3: Psychology    ████████████ 100% [DONE]                              ║
 ║  Phase 4: Biology       ████████████ 100% [DONE]                              ║
 ║  Phase 5: Perception    ████████████ 100% [DONE]                              ║
-║  Phase 6: Knowledge     ░░░░░░░░░░░░   0% [PENDING]                           ║
+║  Phase 6: Knowledge     ████████████ 100% [DONE]                              ║
 ║  Phase 7: Integration   ░░░░░░░░░░░░   0% [PENDING]                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -115,6 +115,11 @@ E:\eva\
 │   ├── modules/encoder.py        [DONE] E9 Resonance Encoder
 │   └── modules/qualia.py         [DONE] Qualia Engine
 │
+├── gks/                          # KNOWLEDGE SYSTEM v0.1.0 (Wisdom)
+│   ├── system.py                 [DONE] Main Controller
+│   ├── modules/graph.py          [DONE] Semantic Network
+│   └── modules/loader.py         [DONE] JSON Block Loader
+│
 ├── eva_matrix/                   # EVA MATRIX v0.1.0 (Psychology)
 │   ├── system.py                 [DONE] 5+2+2 emotional model
 │   ├── modules/psych_engine.py   [DONE] State transitions
@@ -139,8 +144,8 @@ E:\eva\
 │   │                                                                     │   │
 │   │    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐        │   │
 │   │    │  MSPEngine   │    │ Orchestrator │    │   EVAMatrix  │        │   │
-│   │    │   (v0.4.1)   │    │   (Phase 2)  │    │   (Phase 3)  │        │   │
-│   │    │    [DONE]    │    │  [PENDING]   │    │  [PENDING]   │        │   │
+│   │    │   (v0.4.1)   │    │   (v0.1.0)   │    │   (v0.1.0)   │        │   │
+│   │    │    [DONE]    │    │    [DONE]    │    │    [DONE]    │        │   │
 │   │    └──────┬───────┘    └──────────────┘    └──────────────┘        │   │
 │   │           │                                                         │   │
 │   │           │ depends on                                              │   │
@@ -181,8 +186,8 @@ E:\eva\
 │   │   ┌─────────────────────────────────────────────────────────────┐   │   │
 │   │   │                 PHASE 2-7 (PRODUCTION)                      │   │   │
 │   │   │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────┐ │   │   │
-│   │   │  │ResonanceBus│ │ PhysioCore │ │ EVAMatrix  │ │ Qualia   │ │   │   │
-│   │   │  │ [PENDING]  │ │Prov [PEND] │ │Prov [PEND] │ │Eng [PEND]│ │   │   │
+│   │   │  │ResonanceBus│ │ PhysioCore │ │ EVAMatrix  │ │ RMS      │ │   │   │
+│   │   │  │ [PENDING]  │ │  [DONE]    │ │  [DONE]    │ │ [DONE]   │ │   │   │
 │   │   │  └────────────┘ └────────────┘ └────────────┘ └──────────┘ │   │   │
 │   │   │                                                                     │   │
 │   │   │  ┌──────────────────────────────────────────────────────────────┐   │   │
@@ -191,7 +196,7 @@ E:\eva\
 │   │   │  └──────────────────────────────────────────────────────────────┘   │   │
 │   │   │  ┌────────────┐ ┌────────────┐ ┌────────────────────────┐  │   │   │
 │   │   │  │ OllamaLLM  │ │   GKS      │ │      RMSEngine         │  │   │   │
-│   │   │  │ [PENDING]  │ │Load [PEND] │ │      [PENDING]         │  │   │   │
+│   │   │  │  [DONE]    │ │Load [PEND] │ │       [DONE]           │  │   │   │
 │   │   │  └────────────┘ └────────────┘ └────────────────────────┘  │   │   │
 │   │   └─────────────────────────────────────────────────────────────┘   │   │
 │   │                                                                     │   │
@@ -455,11 +460,11 @@ erDiagram
 
 ---
 
-## 6. Current System Flow (Phase 0-3)
+## 6. Current System Flow (Phase 0-5)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│              CURRENT WORKING FLOW (Phase 0-3)                               │
+│              CURRENT WORKING FLOW (Phase 0-5)                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │   ┌─────────────┐                                                           │
@@ -499,22 +504,22 @@ erDiagram
 │   │                      SimpleBus (Pub/Sub)                             │  │
 │   │                                                                      │  │
 │   │   Channels:                                                          │  │
-│   │   ├── bus:physical       (PhysioCore -> Matrix)      [PENDING P4]    │  │
+│   │   ├── bus:physical       (PhysioCore -> Matrix)      [WIRED]         │  │
 │   │   ├── bus:psychological  (Matrix -> Qualia)          [WIRED]         │  │
-│   │   ├── bus:phenomenological (Qualia -> MSP)           [PENDING P5]    │  │
+│   │   ├── bus:phenomenological (Qualia -> MSP)           [WIRED]         │  │
 │   │   └── bus:memory         (MSP events)                [WIRED]         │  │
 │   │                                                                      │  │
 │   └──────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 │   ┌──────────────────────────────────────────────────────────────────────┐  │
-│   │                      Mock Providers (Testing)                        │  │
+│   │                      State Providers (Production)                    │  │
 │   │                                                                      │  │
 │   │   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │  │
-│   │   │ MockPhysio   │  │ MockMatrix   │  │ MockQualia   │              │  │
-│   │   │  Provider    │  │  Provider    │  │  Provider    │              │  │
+│   │   │  PhysioCore  │  │  EVA Matrix  │  │  RMS/Qualia  │              │  │
+│   │   │   v0.1.0     │  │   v0.1.0     │  │   v0.1.0     │              │  │
 │   │   │              │  │              │  │              │              │  │
-│   │   │ dopamine:0.5 │  │ valence:0.7  │  │ color:#808080│              │  │
-│   │   │ cortisol:0.3 │  │ arousal:0.6  │  │ texture:soft │              │  │
+│   │   │ 12 Hormones  │  │ 5+2+2 Model  │  │ E9 Encoder   │              │  │
+│   │   │ Circulatory  │  │ PsychEngine  │  │ Qualia Eng.  │              │  │
 │   │   └──────────────┘  └──────────────┘  └──────────────┘              │  │
 │   │                                                                      │  │
 │   └──────────────────────────────────────────────────────────────────────┘  │
@@ -559,17 +564,17 @@ erDiagram
 │  └── Consciousness: identity, state, knowledge, prompts                                        │
 │       │                                                                     │
 │       ▼                                                                     │
-│  PHASE 4: BIOLOGY [PENDING] (10 tasks)                                      │
-│  ├── PhysioCore directory                                                   │
-│  ├── 12 hormone glands                                                      │
-│  ├── Blood circulation (30Hz)                                               │
+│  PHASE 4: BIOLOGY [DONE] (10 tasks)                                         │
+│  ├── PhysioCore v0.1.0: Main controller                                    │
+│  ├── Hormones: 12 hormone system                                           │
+│  ├── Circulatory: Heartbeat & Bio-Gap sync                                 │
 │  └── PhysioProvider (IStateProvider)                                        │
 │       │                                                                     │
 │       ▼                                                                     │
-│  PHASE 5: PERCEPTION [PENDING] (8 tasks)                                    │
-│  ├── RMS (Resonance Memory System)                                          │
-│  ├── Qualia engine                                                          │
-│  └── RMSEngine (IResonanceEncoder)                                          │
+│  PHASE 5: PERCEPTION [DONE] (8 tasks)                                       │
+│  ├── RMS v0.1.0: Perception controller                                     │
+│  ├── E9 Resonance Encoder                                                  │
+│  └── Qualia Engine                                          │
 │       │                                                                     │
 │       ▼                                                                     │
 │  PHASE 6: KNOWLEDGE [PENDING] (6 tasks)                                     │
@@ -604,8 +609,8 @@ erDiagram
 | **EVA Matrix** | DONE | v0.1.0 | system.py, psych_engine.py, configs/ |
 | **Capabilities** | DONE | v0.1.0 | 23 tools (core, filesystem, utility, agentic) |
 | **Consciousness** | DONE | v0.1.0 | identity/, state/, knowledge/, prompts/ |
-| **PhysioCore** | PENDING | Phase 4 | - |
-| **Qualia/RMS** | PENDING | Phase 5 | - |
+| **PhysioCore** | DONE | v0.1.0 | system.py, modules/hormones.py, modules/circulatory.py |
+| **RMS/Qualia** | DONE | v0.1.0 | system.py, modules/encoder.py, modules/qualia.py |
 | **GKS** | PENDING | Phase 6 | - |
 | **API** | PENDING | Phase 7 | - |
 
@@ -622,6 +627,8 @@ erDiagram
 | ADR-005 | File-per-Record Storage | Accepted |
 | ADR-006 | Module-level Versioning | Accepted |
 | ADR-007 | Consciousness Domain Structure | Accepted |
+| ADR-008 | PhysioCore Bio-Gap Architecture | Accepted |
+| ADR-009 | RMS E9 Resonance Encoding | Accepted |
 
 ---
 
@@ -640,11 +647,13 @@ python -m pytest orchestrator/tests/ -v
 - **MSP Spec:** `msp/README.md`
 - **CIM Payload Spec:** `docs/04_Systems/CIM_Payload_Spec.md`
 - **Capabilities Registry:** `docs/04_Systems/Capabilities_Registry.md`
+- **PhysioCore Spec:** `physio_core/README.md`
+- **RMS Spec:** `rms/README.md`
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Task Files:** `.planning/tasks/P{phase}-{number}_*.yaml`
 
 ### Next Step
-**Phase 4: Biology** - PhysioCore with 12 hormone glands and 30Hz blood circulation
+**Phase 6: Knowledge** - GKS (Genesis Knowledge System) with 7 Master Blocks
 
 ---
 

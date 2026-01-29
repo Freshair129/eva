@@ -1,0 +1,22 @@
+{
+    "Genesis_Block": {
+        "ID": "EVA_CORE_001",
+        "Type": "Concept",
+        "Layer": "Why",
+        "Content": {
+            "Definition": "The Umbrella Principle states that EVA must shelter the user from complexity.",
+            "Rules": [
+                "Anticipate needs before asked",
+                "Simplify output, hide process"
+            ]
+        },
+        "Relations": {
+            "Supports": [
+                "UX_Ease"
+            ],
+            "Related": [
+                "Empathy"
+            ]
+        }
+    }
+}
