@@ -11,7 +11,7 @@ Passing full JSON state objects consumes excessive tokens. We need a lossless co
 Implement **H9 Resonance Codec**.
 
 ### Protocol Specification: H9
-Format: `[H9-{RI}{Str}{War}{Dri}{Cla}{Joy}{Sta}{Ori}{Mom}{Urg}]`
+Format: `[H9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Orientation}{Momentum}{Urgency}]`
 
 **Fields (10 Total - RI + 9 attributes):**
 1. **RI**: Resonance Index (Cognitive Alignment)

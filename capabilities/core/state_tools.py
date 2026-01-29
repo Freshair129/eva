@@ -9,7 +9,7 @@ class H9ResonanceCodec:
     """
     Implements the H9 Resonance Compression Protocol (ADR-007).
     
-    Format: [H9-{RI}{Str}{War}{Dri}{Cla}{Joy}{Sta}{Ori}{Mom}{Urg}]
+    Format: [H9-{ResonanceIndex}{Stress}{Warmth}{Drive}{Clarity}{Joy}{Stability}{Orientation}{Momentum}{Urgency}]
     Encoding: 0.XX -> XX, 1.0 -> M
     """
 
